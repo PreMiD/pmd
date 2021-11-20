@@ -1,0 +1,46 @@
+{
+	"name": "pmd",
+	"description": "hi this is veri kul pmd",
+	"version": "1.0.0",
+	"author": "Timeraa <me@timeraa.dev>",
+	"main": "src/index.ts",
+	"license": "MPL-2.0",
+	"contributors": [
+		"Bas950 <me@bas950.com>",
+		"EncryptedDev"
+	],
+	"scripts": {
+		"dev": "tsc -w",
+		"build": "tsc"
+	},
+	"files": [
+		"bin/*"
+	],
+	"bin": {
+		"pmd": "bin/index.js"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.2.0",
+		"@types/inquirer": "^8.1.3",
+		"@types/node": "^16.11.9",
+		"@types/prompts": "^2.0.14",
+		"@types/semver": "^7.3.9",
+		"typescript": "^4.5.2"
+	},
+	"dependencies": {
+		"@apollo/client": "^3.4.17",
+		"@types/command-line-args": "^5.2.0",
+		"chalk": "^4.1.2",
+		"chokidar": "^3.5.2",
+		"command-line-args": "^5.2.0",
+		"cross-fetch": "^3.1.4",
+		"displayastree": "^2.0.0",
+		"glob": "^7.2.0",
+		"graphql": "^16.0.1",
+		"inquirer": "^8.2.0",
+		"ora": "^6.0.1",
+		"prompts": "^2.4.2",
+		"semver": "^7.3.5",
+		"source-map-support": "^0.5.21"
+	}
+}
