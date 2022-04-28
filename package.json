@@ -33,7 +33,7 @@
 		"chalk": "^4.1.2",
 		"chokidar": "^3.5.2",
 		"command-line-args": "^5.2.0",
-		"cross-fetch": "^3.1.4",
+		"cross-fetch": "^3.1.5",
 		"displayastree": "^2.0.0",
 		"glob": "^7.2.0",
 		"graphql": "^16.0.1",
