@@ -1,77 +1,67 @@
 #!/usr/bin/env node
-import "source-map-support/register";
+import "source-map-support/register.js";
 
 import chalk from "chalk";
-import prompts from "prompts";
+import { readFile } from "fs/promises";
+import inquirer from "inquirer";
+import ora from "ora";
 
-import bump from "./options/bump";
-import create from "./options/create";
-import modify from "./options/modify";
-import cfg from "./util/configHandler";
+import getDiscordAppUser from "./functions/getDiscordAppUser.js";
+import { prefix } from "./util/prefix.js";
 
-export const {
-		name,
-		version,
-		author,
-		contributors
-	}: {
-		name: string;
-		description: string;
-		version: string;
-		author: string;
-		contributors: string[];
-	} = require("../package.json"),
-	config = cfg();
-
-async function run() {
-	console.log(
-		chalk.green(
-			`Launching ${chalk.bold(name)} ${chalk.hex("#bebebe")(
-				"(v" + version + ")"
-			)}…`
-		)
+if (!(await inPresenceRepo())) {
+	console.error(
+		prefix,
+		chalk.redBright("This command can only be run in the presence repository")
 	);
-
-	if (config.create) return create();
-	if (config.modify) return modify();
-	if (config.bump) return bump();
-
-	const mainPrompt = await prompts([
-		{
-			name: "main",
-			message: "Select an option",
-			hint: "Use arrow-keys. Press enter to submit.",
-			type: "select",
-			choices: [
-				{
-					title: "Create Presence",
-					description: "Creates a new Presence."
-				},
-				{
-					title: "Modify Presence",
-					description: "Modify an existing Presence."
-				}
-			]
-		}
-	]);
-
-	if (mainPrompt.main === 0) return create();
-	else return modify();
+	process.exit(1);
 }
 
-run();
+const spinner = ora("Fetching Discord User...").start(),
+	user = await getDiscordAppUser();
+spinner.stop();
 
-/*
+if (user) console.log(prefix, `Hello ${chalk.green(user.username)}!`);
 
-pmd -c
-pmd -d
+const { action } = await inquirer.prompt<{ action: number }>([
+	{
+		type: "list",
+		name: "action",
+		message: "What do you want to do?",
+		choices: [
+			{
+				name: "Create a new Presence",
+				value: 0
+			},
+			{
+				name: "Modify an existing Presence",
+				value: 1
+			},
+			{
+				name: "Translate a Presence",
+				value: 2
+			}
+		]
+	}
+]);
 
-question?
-create new
-- input name
+switch (action) {
+	case 0:
+		await import("./actions/create.js");
+		break;
+	case 1:
+		await import("./actions/modify.js");
+		break;
+	/* 	case 2:
+		await import("./actions/translate.js");
+		break; */
+}
 
-select
-- dev
-- build
-
-*/
+async function inPresenceRepo() {
+	try {
+		const { name } = JSON.parse(await readFile("./package.json", "utf8"));
+		return name === "presences";
+	} catch {
+		return false;
+	}
+}

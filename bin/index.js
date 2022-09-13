@@ -1,49 +1,55 @@
 #!/usr/bin/env node
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-var _a;
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.config = exports.contributors = exports.author = exports.version = exports.name = void 0;
-require("source-map-support/register");
-const chalk_1 = __importDefault(require("chalk"));
-const prompts_1 = __importDefault(require("prompts"));
-const bump_1 = __importDefault(require("./options/bump"));
-const create_1 = __importDefault(require("./options/create"));
-const modify_1 = __importDefault(require("./options/modify"));
-const configHandler_1 = __importDefault(require("./util/configHandler"));
-_a = require("../package.json"), exports.name = _a.name, exports.version = _a.version, exports.author = _a.author, exports.contributors = _a.contributors, exports.config = (0, configHandler_1.default)();
-async function run() {
-    console.log(chalk_1.default.green(`Launching ${chalk_1.default.bold(exports.name)} ${chalk_1.default.hex("#bebebe")("(v" + exports.version + ")")}…`));
-    if (exports.config.create)
-        return (0, create_1.default)();
-    if (exports.config.modify)
-        return (0, modify_1.default)();
-    if (exports.config.bump)
-        return (0, bump_1.default)();
-    const mainPrompt = await (0, prompts_1.default)([
-        {
-            name: "main",
-            message: "Select an option",
-            hint: "Use arrow-keys. Press enter to submit.",
-            type: "select",
-            choices: [
-                {
-                    title: "Create Presence",
-                    description: "Creates a new Presence."
-                },
-                {
-                    title: "Modify Presence",
-                    description: "Modify an existing Presence."
-                }
-            ]
-        }
-    ]);
-    if (mainPrompt.main === 0)
-        return (0, create_1.default)();
-    else
-        return (0, modify_1.default)();
+import "source-map-support/register.js";
+import chalk from "chalk";
+import { readFile } from "fs/promises";
+import inquirer from "inquirer";
+import ora from "ora";
+import getDiscordAppUser from "./functions/getDiscordAppUser.js";
+import { prefix } from "./util/prefix.js";
+if (!(await inPresenceRepo())) {
+    console.error(prefix, chalk.redBright("This command can only be run in the presence repository"));
+    process.exit(1);
 }
-run();
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7QUFDQSx1Q0FBcUM7QUFFckMsa0RBQTBCO0FBQzFCLHNEQUE4QjtBQUU5QiwwREFBa0M7QUFDbEMsOERBQXNDO0FBQ3RDLDhEQUFzQztBQUN0Qyx5RUFBdUM7QUFFMUIsS0FXUixPQUFPLENBQUMsaUJBQWlCLENBQUMsRUFWN0IsWUFBSSxZQUNKLGVBQU8sZUFDUCxjQUFNLGNBQ04sb0JBQVksb0JBUWIsUUFBQSxNQUFNLEdBQUcsSUFBQSx1QkFBRyxHQUFFLENBQUM7QUFFaEIsS0FBSyxVQUFVLEdBQUc7SUFDakIsT0FBTyxDQUFDLEdBQUcsQ0FDVixlQUFLLENBQUMsS0FBSyxDQUNWLGFBQWEsZUFBSyxDQUFDLElBQUksQ0FBQyxZQUFJLENBQUMsSUFBSSxlQUFLLENBQUMsR0FBRyxDQUFDLFNBQVMsQ0FBQyxDQUNwRCxJQUFJLEdBQUcsZUFBTyxHQUFHLEdBQUcsQ0FDcEIsR0FBRyxDQUNKLENBQ0QsQ0FBQztJQUVGLElBQUksY0FBTSxDQUFDLE1BQU07UUFBRSxPQUFPLElBQUEsZ0JBQU0sR0FBRSxDQUFDO0lBQ25DLElBQUksY0FBTSxDQUFDLE1BQU07UUFBRSxPQUFPLElBQUEsZ0JBQU0sR0FBRSxDQUFDO0lBQ25DLElBQUksY0FBTSxDQUFDLElBQUk7UUFBRSxPQUFPLElBQUEsY0FBSSxHQUFFLENBQUM7SUFFL0IsTUFBTSxVQUFVLEdBQUcsTUFBTSxJQUFBLGlCQUFPLEVBQUM7UUFDaEM7WUFDQyxJQUFJLEVBQUUsTUFBTTtZQUNaLE9BQU8sRUFBRSxrQkFBa0I7WUFDM0IsSUFBSSxFQUFFLHdDQUF3QztZQUM5QyxJQUFJLEVBQUUsUUFBUTtZQUNkLE9BQU8sRUFBRTtnQkFDUjtvQkFDQyxLQUFLLEVBQUUsaUJBQWlCO29CQUN4QixXQUFXLEVBQUUseUJBQXlCO2lCQUN0QztnQkFDRDtvQkFDQyxLQUFLLEVBQUUsaUJBQWlCO29CQUN4QixXQUFXLEVBQUUsOEJBQThCO2lCQUMzQzthQUNEO1NBQ0Q7S0FDRCxDQUFDLENBQUM7SUFFSCxJQUFJLFVBQVUsQ0FBQyxJQUFJLEtBQUssQ0FBQztRQUFFLE9BQU8sSUFBQSxnQkFBTSxHQUFFLENBQUM7O1FBQ3RDLE9BQU8sSUFBQSxnQkFBTSxHQUFFLENBQUM7QUFDdEIsQ0FBQztBQUVELEdBQUcsRUFBRSxDQUFDIn0=
+const spinner = ora("Fetching Discord User...").start(), user = await getDiscordAppUser();
+spinner.stop();
+if (user)
+    console.log(prefix, `Hello ${chalk.green(user.username)}!`);
+const { action } = await inquirer.prompt([
+    {
+        type: "list",
+        name: "action",
+        message: "What do you want to do?",
+        choices: [
+            {
+                name: "Create a new Presence",
+                value: 0
+            },
+            {
+                name: "Modify an existing Presence",
+                value: 1
+            },
+            {
+                name: "Translate a Presence",
+                value: 2
+            }
+        ]
+    }
+]);
+switch (action) {
+    case 0:
+        await import("./actions/create.js");
+        break;
+    case 1:
+        await import("./actions/modify.js");
+        break;
+}
+async function inPresenceRepo() {
+    try {
+        const { name } = JSON.parse(await readFile("./package.json", "utf8"));
+        return name === "presences";
+    }
+    catch {
+        return false;
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IjtBQUNBLE9BQU8sZ0NBQWdDLENBQUM7QUFFeEMsT0FBTyxLQUFLLE1BQU0sT0FBTyxDQUFDO0FBQzFCLE9BQU8sRUFBRSxRQUFRLEVBQUUsTUFBTSxhQUFhLENBQUM7QUFDdkMsT0FBTyxRQUFRLE1BQU0sVUFBVSxDQUFDO0FBQ2hDLE9BQU8sR0FBRyxNQUFNLEtBQUssQ0FBQztBQUV0QixPQUFPLGlCQUFpQixNQUFNLGtDQUFrQyxDQUFDO0FBQ2pFLE9BQU8sRUFBRSxNQUFNLEVBQUUsTUFBTSxrQkFBa0IsQ0FBQztBQUUxQyxJQUFJLENBQUMsQ0FBQyxNQUFNLGNBQWMsRUFBRSxDQUFDLEVBQUU7SUFDOUIsT0FBTyxDQUFDLEtBQUssQ0FDWixNQUFNLEVBQ04sS0FBSyxDQUFDLFNBQVMsQ0FBQyx5REFBeUQsQ0FBQyxDQUMxRSxDQUFDO0lBQ0YsT0FBTyxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsQ0FBQztDQUNoQjtBQUVELE1BQU0sT0FBTyxHQUFHLEdBQUcsQ0FBQywwQkFBMEIsQ0FBQyxDQUFDLEtBQUssRUFBRSxFQUN0RCxJQUFJLEdBQUcsTUFBTSxpQkFBaUIsRUFBRSxDQUFDO0FBQ2xDLE9BQU8sQ0FBQyxJQUFJLEVBQUUsQ0FBQztBQUVmLElBQUksSUFBSTtJQUFFLE9BQU8sQ0FBQyxHQUFHLENBQUMsTUFBTSxFQUFFLFNBQVMsS0FBSyxDQUFDLEtBQUssQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLEdBQUcsQ0FBQyxDQUFDO0FBRXRFLE1BQU0sRUFBRSxNQUFNLEVBQUUsR0FBRyxNQUFNLFFBQVEsQ0FBQyxNQUFNLENBQXFCO0lBQzVEO1FBQ0MsSUFBSSxFQUFFLE1BQU07UUFDWixJQUFJLEVBQUUsUUFBUTtRQUNkLE9BQU8sRUFBRSx5QkFBeUI7UUFDbEMsT0FBTyxFQUFFO1lBQ1I7Z0JBQ0MsSUFBSSxFQUFFLHVCQUF1QjtnQkFDN0IsS0FBSyxFQUFFLENBQUM7YUFDUjtZQUNEO2dCQUNDLElBQUksRUFBRSw2QkFBNkI7Z0JBQ25DLEtBQUssRUFBRSxDQUFDO2FBQ1I7WUFDRDtnQkFDQyxJQUFJLEVBQUUsc0JBQXNCO2dCQUM1QixLQUFLLEVBQUUsQ0FBQzthQUNSO1NBQ0Q7S0FDRDtDQUNELENBQUMsQ0FBQztBQUVILFFBQVEsTUFBTSxFQUFFO0lBQ2YsS0FBSyxDQUFDO1FBQ0wsTUFBTSxNQUFNLENBQUMscUJBQXFCLENBQUMsQ0FBQztRQUNwQyxNQUFNO0lBQ1AsS0FBSyxDQUFDO1FBQ0wsTUFBTSxNQUFNLENBQUMscUJBQXFCLENBQUMsQ0FBQztRQUNwQyxNQUFNO0NBSVA7QUFFRCxLQUFLLFVBQVUsY0FBYztJQUM1QixJQUFJO1FBQ0gsTUFBTSxFQUFFLElBQUksRUFBRSxHQUFHLElBQUksQ0FBQyxLQUFLLENBQUMsTUFBTSxRQUFRLENBQUMsZ0JBQWdCLEVBQUUsTUFBTSxDQUFDLENBQUMsQ0FBQztRQUN0RSxPQUFPLElBQUksS0FBSyxXQUFXLENBQUM7S0FDNUI7SUFBQyxNQUFNO1FBQ1AsT0FBTyxLQUFLLENBQUM7S0FDYjtBQUNGLENBQUMifQ==
