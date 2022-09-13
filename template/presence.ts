@@ -1,11 +1,11 @@
 const presence = new Presence({
 		//The client ID of the Application created at https://discordapp.com/developers/applications
-		clientId: "000000000000000000"
+		clientId: "000000000000000000",
 	}),
 	//You can use this to get translated strings in their browser language
 	strings = presence.getStrings({
 		play: "presence.playback.playing",
-		pause: "presence.playback.paused"
+		pause: "presence.playback.paused",
 	});
 
 /*
@@ -40,7 +40,7 @@ presence.on("UpdateData", async () => {
 		//The unix epoch timestamp for when to start counting from
 		startTimestamp: 3133657200000,
 		//If you want to show Time Left instead of Elapsed, this is the unix epoch timestamp at which the timer ends
-		endTimestamp: 3133700400000
+		endTimestamp: 3133700400000,
 		//Optionally you can set a largeImageKey here and change the rest as variable subproperties, for example presenceData.type = "blahblah"; type examples: details, state, etc.
 	};
 	//Update the presence with all the values from the presenceData object

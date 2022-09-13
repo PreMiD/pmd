@@ -10,6 +10,7 @@ import { fileURLToPath } from "url";
 import getDiscordAppUser from "../functions/getDiscordAppUser.js";
 import getDiscordUser from "../functions/getDiscordUser.js";
 import getFolderLetter from "../functions/getFolderLetter.js";
+import isFirstTimeAuthor from "../functions/isFirstTimeAuthor.js";
 import { prefix } from "../util/prefix.js";
 
 const v = new Validator();
@@ -212,8 +213,15 @@ await cp(
 	resolve(fileURLToPath(import.meta.url), "../../../template/tsconfig.json"),
 	resolve(presencePath, "tsconfig.json")
 );
+
+const presenceFileToCopy = (await isFirstTimeAuthor(res.author))
+	? "presence.ts"
+	: "presence.min.ts";
 await cp(
-	resolve(fileURLToPath(import.meta.url), "../../../template/presence.ts"),
+	resolve(
+		fileURLToPath(import.meta.url),
+		`../../../template/${presenceFileToCopy}`
+	),
 	resolve(presencePath, "presence.ts")
 );
 
