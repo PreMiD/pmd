@@ -4,12 +4,12 @@ export let user: User | undefined;
 
 export default function getDiscordAppUser() {
 	return new Promise<User | undefined>(async (res, rej) => {
-		if (user) return user;
+		if (user) return res(user);
 
 		const client = new Client({ transport: "ipc" });
 
 		const t = setTimeout(() => {
-			if (user) return;
+			if (user) return res(user);
 
 			client.destroy();
 			res(undefined);
