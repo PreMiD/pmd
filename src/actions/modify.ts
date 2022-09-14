@@ -1,7 +1,9 @@
 import chalk from "chalk";
-import { basename, dirname } from "path";
+import { cp } from "fs/promises";
+import { basename, dirname, resolve } from "path";
 import prompts from "prompts";
 import ts from "typescript";
+import { fileURLToPath } from "url";
 
 import getFolderLetter from "../functions/getFolderLetter.js";
 import getPresences from "../functions/getPresences.js";
@@ -28,8 +30,17 @@ const formatHost: ts.FormatDiagnosticsHost = {
 	getNewLine: () => ts.sys.newLine
 };
 
+const presencePath = resolve(
+	`./websites/${getFolderLetter(service)}/${service}`
+);
+
+await cp(
+	resolve(fileURLToPath(import.meta.url), "../../../template/tsconfig.json"),
+	resolve(presencePath, "tsconfig.json")
+);
+
 const configPath = ts.findConfigFile(
-	`./websites/${getFolderLetter(service)}/${service}`,
+	presencePath,
 	ts.sys.fileExists,
 	"tsconfig.json"
 );
