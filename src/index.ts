@@ -52,9 +52,9 @@ switch (action) {
 	case 1:
 		await import("./actions/modify.js");
 		break;
-	/* 	case 2:
+	case 2:
 		await import("./actions/translate.js");
-		break; */
+		break;
 }
 
 async function inPresenceRepo() {

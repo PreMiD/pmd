@@ -1,5 +1,4 @@
 import chalk from "chalk";
-import fetch from "cross-fetch";
 import { access, cp, mkdir, readFile, writeFile } from "fs/promises";
 import inquirer from "inquirer";
 import { Validator } from "jsonschema";
@@ -7,6 +6,7 @@ import ora from "ora";
 import { resolve } from "path";
 import { fileURLToPath } from "url";
 
+import fetchSchema from "../functions/fetchSchema.js";
 import getDiscordAppUser from "../functions/getDiscordAppUser.js";
 import getDiscordUser from "../functions/getDiscordUser.js";
 import getFolderLetter from "../functions/getFolderLetter.js";
@@ -19,9 +19,7 @@ const discordUser = await getDiscordAppUser();
 
 const spinner = ora("Fetching Schema...").start();
 
-const schema = await (
-	await fetch("https://schemas.premid.app/metadata/1.7")
-).json();
+const schema = await fetchSchema();
 
 v.addSchema({ definitions: schema.definitions });
 
@@ -111,7 +109,7 @@ const res = await inquirer.prompt<{
 	},
 	{
 		name: "url",
-		message: "URL of the website",
+		message: "URL of the website (separate multiple URLs with a comma)",
 		validate: (input: string) => {
 			if (!input) return "URL cannot be empty!";
 
@@ -164,7 +162,7 @@ const res = await inquirer.prompt<{
 	},
 	{
 		name: "tags",
-		message: "Tags of the Presence",
+		message: "Tags of the Presence (separate multiple tags with a comma)",
 		validate: (input: string) => {
 			if (!input) return "Tags cannot be empty!";
 
