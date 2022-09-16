@@ -1,15 +1,20 @@
 import { gql } from "@apollo/client/core/index.js";
 import chalk from "chalk";
+import { writeFile } from "fs/promises";
 import inquirer from "inquirer";
 import { getLanguage } from "language-flag-colors";
+import { resolve } from "node:path";
 import ora from "ora";
 import prompts from "prompts";
+import semver from "semver";
 
 import fetchSchema from "../functions/fetchSchema.js";
+import getFolderLetter from "../functions/getFolderLetter.js";
 import getPresences from "../functions/getPresences.js";
 import { apollo } from "../util/apollo.js";
 
 const spinner = ora("Loading languages...").start();
+const { coerce, inc, valid } = semver;
 
 const {
 	data: { langFiles }
@@ -74,6 +79,15 @@ const { mode } = await prompts([
 
 const { selPresences, category } = await prompts([
 	{
+		type: mode === 1 ? "select" : false,
+		name: "category",
+		message: "Category of the service",
+		choices: schema.properties.category.enum.map((c: string) => ({
+			title: c,
+			value: c
+		}))
+	},
+	{
 		type: mode === 2 ? "autocompleteMultiselect" : false,
 		name: "selPresences",
 		message: "Select the Presences you want to translate",
@@ -83,17 +97,11 @@ const { selPresences, category } = await prompts([
 			value: p
 		})),
 		min: 1
-	},
-	{
-		type: "list",
-		name: "category",
-		message: "Category of the service",
-		choices: schema.properties.category.enum
 	}
 ]);
 
 if (mode === 2) {
-	await translatePresences(selPresences);
+	await translatePresences(selPresences, lang);
 
 	process.exit(0);
 }
@@ -109,27 +117,49 @@ const { filterPresences } = await prompts([
 if (filterPresences) presences = presences.filter(p => !p.description?.[lang]);
 if (category) presences = presences.filter(p => p.category === category);
 
-await translatePresences(presences);
+await translatePresences(presences, lang);
 
 process.exit(0);
 
-async function translatePresences(presences: any) {
+async function translatePresences(presences: any, lang: string) {
+	if (!Array.isArray(presences)) process.exit(0);
 	for (const presence of presences) {
-		const desc = presence.description?.[lang];
+		const desc = presence.description?.[lang],
+			enDesc = presence.description?.en;
 
 		console.log(
 			`${
-				desc ? chalk.green(desc) + "\n\n" : ""
+				enDesc ? chalk.green(enDesc) + "\n\n" : ""
 			}Type "skip" to skip or "stop" to stop translating.`
 		);
 		const { translation } = await inquirer.prompt({
 			type: "input",
 			name: "translation",
 			message: presence.service,
-			default: desc
+			default: desc,
+			validate: (input: string) =>
+				!!input ||
+				"You need to enter a translation, or type 'skip' to skip, or 'stop' to stop translating."
 		});
 
 		if (translation === "skip" || translation === desc) continue;
 		if (translation === "stop") break;
+
+		const presencePath = resolve(
+			`./websites/${getFolderLetter(presence.service)}/${presence.service}`
+		);
+
+		presence.description[lang] = translation;
+		if (valid(coerce(presence.version)))
+			presence.version = inc(valid(coerce(presence.version)!)!, "patch");
+		else
+			console.warn(
+				`Invalid version for ${presence.service}, skipping version bump.`
+			);
+
+		await writeFile(
+			resolve(presencePath, "dist/metadata.json"),
+			JSON.stringify(presence, null, 2)
+		);
 	}
 }

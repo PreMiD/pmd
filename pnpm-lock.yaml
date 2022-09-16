@@ -8,6 +8,7 @@ specifiers:
   '@types/inquirer': ^9.0.1
   '@types/node': ^18.7.16
   '@types/prompts': ^2.0.14
+  '@types/semver': ^7.3.12
   chalk: ^5.0.1
   cross-fetch: ^3.1.5
   discord-rpc: ^4.0.1
@@ -20,6 +21,7 @@ specifiers:
   ora: ^6.1.2
   prompts: ^2.4.2
   rimraf: ^3.0.2
+  semver: ^7.3.7
   source-map-support: ^0.5.21
   typescript: ^4.8.3
 
@@ -36,6 +38,7 @@ dependencies:
   language-flag-colors: 2.1.1
   ora: 6.1.2
   prompts: 2.4.2
+  semver: 7.3.7
   source-map-support: 0.5.21
 
 devDependencies:
@@ -45,6 +48,7 @@ devDependencies:
   '@types/inquirer': 9.0.1
   '@types/node': 18.7.16
   '@types/prompts': 2.0.14
+  '@types/semver': 7.3.12
   rimraf: 3.0.2
   typescript: 4.8.3
 
@@ -147,6 +151,10 @@ packages:
     resolution: {integrity: sha512-HZBd99fKxRWpYCErtm2/yxUZv6/PBI9J7N4TNFffl5JbrYMHBwF25DjQGTW3b3jmXq+9P6/8fCIb2ee57BFfYA==}
     dependencies:
       '@types/node': 18.7.16
+    dev: true
+
+  /@types/semver/7.3.12:
+    resolution: {integrity: sha512-WwA1MW0++RfXmCr12xeYOOC5baSC9mSb0ZqCquFzKhcoF4TvHu5MKOuXsncgZcpVFhB1pXd5hZmM0ryAoCp12A==}
     dev: true
 
   /@types/through/0.0.30:
@@ -566,6 +574,13 @@ packages:
       js-tokens: 4.0.0
     dev: false
 
+  /lru-cache/6.0.0:
+    resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
+    engines: {node: '>=10'}
+    dependencies:
+      yallist: 4.0.0
+    dev: false
+
   /merge2/1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
@@ -760,6 +775,14 @@ packages:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
     dev: false
 
+  /semver/7.3.7:
+    resolution: {integrity: sha512-QlYTucUYOews+WeEujDoEGziz4K6c47V/Bd+LjSSYcA94p+DmINdf7ncaUinThfvZyu13lN9OY1XDxt8C0Tw0g==}
+    engines: {node: '>=10'}
+    hasBin: true
+    dependencies:
+      lru-cache: 6.0.0
+    dev: false
+
   /signal-exit/3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
     dev: false
@@ -900,6 +923,10 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+    dev: false
+
+  /yallist/4.0.0:
+    resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
     dev: false
 
   /zen-observable-ts/1.2.5:
