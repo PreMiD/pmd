@@ -12,6 +12,7 @@ import fetchSchema from "../functions/fetchSchema.js";
 import getFolderLetter from "../functions/getFolderLetter.js";
 import getPresences from "../functions/getPresences.js";
 import { apollo } from "../util/apollo.js";
+import { prefix } from "../util/prefix.js";
 
 const spinner = ora("Loading languages...").start();
 const { coerce, inc, valid } = semver;
@@ -52,6 +53,11 @@ const { lang } = await prompts({
 		);
 	}
 });
+
+if (!lang) {
+	console.log(prefix, chalk.redBright("No language selected, exiting..."));
+	process.exit(0);
+}
 
 let presences = await getPresences();
 
