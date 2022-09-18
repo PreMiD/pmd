@@ -11,7 +11,7 @@ export default function getDiscordAppUser() {
 		const t = setTimeout(() => {
 			if (user) return res(user);
 
-			client.destroy();
+			client.destroy().catch(() => {});
 			res(undefined);
 		}, 500);
 
