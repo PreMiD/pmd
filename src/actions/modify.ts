@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { watch } from "fs";
 import { cp } from "fs/promises";
 import { basename, dirname, resolve } from "path";
 import prompts from "prompts";
@@ -122,3 +123,14 @@ const compilerHost = ts.createWatchCompilerHost(
 );
 
 ts.createWatchProgram(compilerHost);
+
+await cp(
+	resolve(presencePath, "metadata.json"),
+	resolve(presencePath, "dist/metadata.json")
+);
+watch(resolve(presencePath, "metadata.json"), () =>
+	cp(
+		resolve(presencePath, "metadata.json"),
+		resolve(presencePath, "dist/metadata.json")
+	)
+);
