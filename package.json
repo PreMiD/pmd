@@ -1,7 +1,7 @@
 {
 	"name": "pmd",
-	"description": "hi this is veri kul pmd",
-	"version": "1.0.0",
+	"description": "CLI for creating, modifying & translating Presences.",
+	"version": "1.0.1",
 	"author": "Timeraa <me@timeraa.dev>",
 	"main": "src/index.ts",
 	"license": "MPL-2.0",
