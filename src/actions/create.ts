@@ -203,7 +203,7 @@ metadata.category = res.category;
 metadata.version = "1.0.0";
 
 await writeFile(
-	resolve(presencePath, "dist/metadata.json"),
+	resolve(presencePath, "metadata.json"),
 	JSON.stringify(metadata, null, 2)
 );
 
