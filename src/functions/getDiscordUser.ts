@@ -10,7 +10,6 @@ export default async function getDiscordUser(id: string) {
 			query getUser($id: String) {
 				discordUsers(userId: $id) {
 					username
-					discriminator
 				}
 			}
 		`,
