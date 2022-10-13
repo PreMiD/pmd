@@ -202,6 +202,10 @@ metadata.tags = res.tags.split(",");
 metadata.category = res.category;
 metadata.version = "1.0.0";
 
+const presenceFileToCopy = (await isFirstTimeAuthor(res.author))
+	? "presence.ts"
+	: "presence.min.ts";
+
 await writeFile(
 	resolve(presencePath, "metadata.json"),
 	JSON.stringify(metadata, null, "\t")
@@ -212,9 +216,6 @@ await cp(
 	resolve(presencePath, "tsconfig.json")
 );
 
-const presenceFileToCopy = (await isFirstTimeAuthor(res.author))
-	? "presence.ts"
-	: "presence.min.ts";
 await cp(
 	resolve(
 		fileURLToPath(import.meta.url),

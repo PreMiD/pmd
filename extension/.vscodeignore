@@ -1,0 +1,10 @@
+.vscode/
+src/
+
+*.ts
+
+dist/*.ts
+dist/*.js.map
+
+tsconfig.json
+yarn.lock

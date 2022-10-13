@@ -165,6 +165,8 @@ await cp(resolve(fileURLToPath(import.meta.url), "../../../template/tsconfig.jso
 const presenceFileToCopy = (await isFirstTimeAuthor(res.author))
     ? "presence.ts"
     : "presence.min.ts";
+await writeFile(resolve(presencePath, "metadata.json"), JSON.stringify(metadata, null, 2));
+await cp(resolve(fileURLToPath(import.meta.url), "../../../template/tsconfig.json"), resolve(presencePath, "tsconfig.json"));
 await cp(resolve(fileURLToPath(import.meta.url), `../../../template/${presenceFileToCopy}`), resolve(presencePath, "presence.ts"));
 console.log(prefix, chalk.green("Presence created! You can now start coding!"));
 async function serviceExists(service) {

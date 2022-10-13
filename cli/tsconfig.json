@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "rootDir": "./src",
+    "outDir": "./bin"
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["templete"]
+}
