@@ -1,14 +1,19 @@
-import chalk from "chalk";
-import { watch } from "fs";
-import { cp } from "fs/promises";
+import chalk, { ChalkInstance } from "chalk";
+import { existsSync } from "fs";
+import { cp, rm } from "fs/promises";
 import { basename, dirname, resolve } from "path";
 import prompts from "prompts";
 import ts from "typescript";
 import { fileURLToPath } from "url";
+import webpack from "webpack";
+import CopyPlugin from "copy-webpack-plugin";
 
 import getFolderLetter from "../functions/getFolderLetter.js";
 import getPresences from "../functions/getPresences.js";
 import { prefix } from "../util/prefix.js";
+import { ErrorInfo } from "ts-loader/dist/interfaces.js";
+import ModuleManager from "../util/ModuleManager.js";
+import { watch } from "chokidar";
 
 const { service } = await prompts({
 	name: "service",
@@ -25,112 +30,186 @@ const { service } = await prompts({
 
 if (!service) process.exit(0);
 
-const formatHost: ts.FormatDiagnosticsHost = {
-	getCanonicalFileName: path => path,
-	getCurrentDirectory: ts.sys.getCurrentDirectory,
-	getNewLine: () => ts.sys.newLine
-};
-
 const presencePath = resolve(
 	`./websites/${getFolderLetter(service)}/${service}`
 );
+
+const moduleManager = new ModuleManager(presencePath);
+
+await moduleManager.installDependencies();
 
 await cp(
 	resolve(fileURLToPath(import.meta.url), "../../../template/tsconfig.json"),
 	resolve(presencePath, "tsconfig.json")
 );
 
-const configPath = ts.findConfigFile(
-	presencePath,
-	ts.sys.fileExists,
-	"tsconfig.json"
-);
+console.log(prefix, chalk.greenBright("Starting TypeScript compiler..."));
+class Compiler {
+	private compiler: webpack.Compiler | null = null;
+	private watching: webpack.Watching | null = null;
+	public firstRun = true;
 
-if (!configPath) {
-	console.error("Could not find a valid 'tsconfig.json'.");
-	process.exit(1);
-}
+	constructor(private cwd: string) {}
 
-const reportWatchStatusChanged: ts.WatchStatusReporter = (
-	diagnostic,
-	_newLine,
-	_options,
-	errorCount
-) => {
-	switch (diagnostic.code) {
-		case 6031:
-			return console.log(
-				prefix,
-				chalk.greenBright("Starting TypeScript compiler...")
+	async watch() {
+		this.compiler = webpack({
+			mode: "none",
+			resolveLoader: {
+				modules: [fileURLToPath(new URL("../../node_modules", import.meta.url))]
+			},
+			devtool: "inline-source-map",
+			plugins: [
+				new webpack.DynamicEntryPlugin(this.cwd, async () => {
+					return new Promise(r => {
+						if (existsSync(resolve(this.cwd, "iframe.ts")))
+							r({
+								"iframe.js": {
+									filename: "iframe.js",
+									baseUri: this.cwd,
+									import: ["./iframe.ts"]
+								}
+							});
+						else r({});
+					});
+				}),
+				new CopyPlugin({
+					patterns: [
+						{
+							from: resolve(this.cwd, "metadata.json"),
+							to: "metadata.json"
+						}
+					]
+				}),
+				new webpack.WatchIgnorePlugin({
+					paths: [/\.js$/, /\.d\.[cm]ts$/]
+				})
+			],
+			module: {
+				rules: [
+					{
+						test: /\.ts$/,
+						loader: "ts-loader",
+						exclude: /node_modules/,
+						options: {
+							onlyCompileBundledFiles: true,
+							errorFormatter: (error: ErrorInfo, colors: ChalkInstance) => {
+								return (
+									`${prefix} ${colors.cyan(
+										basename(dirname(error.file!)) + "/" + basename(error.file!)
+									)}` +
+									":" +
+									colors.yellowBright(error.line) +
+									":" +
+									colors.yellowBright(error.character) +
+									" - " +
+									colors.redBright("Error ") +
+									colors.gray("TS" + error.code + ":") +
+									" " +
+									ts.flattenDiagnosticMessageText(error.content, "\n")
+								);
+							}
+						}
+					}
+				]
+			},
+			resolve: {
+				extensions: [".ts"]
+			},
+			entry: async () => {
+				const output: Record<string, string> = {
+					presence: resolve(this.cwd, "presence.ts")
+				};
+
+				return output;
+			},
+			output: {
+				path: resolve(this.cwd, "dist"),
+				filename: "[name].js",
+				iife: false,
+				clean: true
+			}
+		});
+
+		this.compiler.hooks.compile.tap("pmd", () => {
+			if (!this.firstRun)
+				console.log(prefix, chalk.yellowBright("Recompiling..."));
+
+			this.firstRun = false;
+		});
+
+		this.compiler.hooks.afterCompile.tap("pmd", compilation => {
+			compilation.errors = compilation.errors.filter(
+				e => e.name !== "ModuleBuildError"
 			);
-		case 6194:
-			if (errorCount === 0)
+
+			for (const error of compilation.errors) {
+				if (
+					error.name === "ModuleNotFoundError" &&
+					error.message.includes(resolve(this.cwd, "package.json"))
+				) {
+					console.error(prefix, chalk.redBright("package.json not valid!"));
+					continue;
+				}
+
+				console.error(error.message);
+			}
+
+			if (compilation.errors.length === 0)
 				return console.log(prefix, chalk.greenBright("Successfully compiled!"));
 			else
 				return console.log(
 					prefix,
 					chalk.redBright(
-						`Failed to compile with ${errorCount} error${
-							errorCount === 1 ? "" : "s"
+						`Failed to compile with ${compilation.errors.length} error${
+							compilation.errors.length === 1 ? "" : "s"
 						}!`
 					)
 				);
-		case 6032:
-			return console.log(prefix, chalk.yellowBright("Recompiling..."));
-		case 6193:
-			return console.error(
-				prefix,
-				chalk.redBright(`Failed to compile with 1 error!`)
-			);
-		default:
-			return console.info(ts.formatDiagnostic(diagnostic, formatHost));
+		});
+
+		await new Promise(r => (this.watching = this.compiler!.watch({}, r)));
 	}
-};
 
-const reportDiagnostic: ts.DiagnosticReporter = diagnostic => {
-	const { character, line } = ts.getLineAndCharacterOfPosition(
-		diagnostic.file!,
-		diagnostic.start!
-	);
+	async stop() {
+		this.watching?.suspend();
+		if (this.watching) await new Promise(r => this.watching?.close(r));
+	}
 
-	console.error(
-		prefix,
-		chalk.cyan(
-			basename(dirname(diagnostic.file?.fileName!)) +
-				"/" +
-				basename(diagnostic.file?.fileName!)
-		) +
-			":" +
-			chalk.yellowBright(line + 1) +
-			":" +
-			chalk.yellowBright(character + 1),
-		"-",
-		chalk.redBright("Error ") + chalk.gray("TS" + diagnostic.code + ":"),
-		ts.flattenDiagnosticMessageText(
-			diagnostic.messageText,
-			formatHost.getNewLine()
-		)
-	);
-};
+	async restart() {
+		this.firstRun = true;
+		await this.stop();
+		await this.watch();
+	}
+}
 
-const compilerHost = ts.createWatchCompilerHost(
-	configPath,
-	{},
-	ts.sys,
-	ts.createEmitAndSemanticDiagnosticsBuilderProgram,
-	reportDiagnostic,
-	reportWatchStatusChanged
+const compiler = new Compiler(presencePath);
+
+watch(presencePath, { depth: 0, persistent: true, ignoreInitial: true }).on(
+	"all",
+	async (event, file) => {
+		if (["add", "unlink"].includes(event) && basename(file) === "iframe.ts")
+			return await compiler.restart();
+
+		if (basename(file) === "package.json") {
+			if (
+				["add", "change"].includes(event) &&
+				!(await moduleManager.isValidPackageJson())
+			)
+				return console.error(prefix, chalk.redBright("Invalid package.json!"));
+
+			await compiler.stop();
+
+			if ("change" === event) await moduleManager.installDependencies();
+			else if (event === "unlink") {
+				if (existsSync(resolve(presencePath, "node_modules")))
+					rm(resolve(presencePath, "node_modules"), { recursive: true });
+				if (existsSync(resolve(presencePath, "package-lock.json")))
+					rm(resolve(presencePath, "package-lock.json"));
+			}
+
+			compiler.restart();
+		}
+	}
 );
 
-ts.createWatchProgram(compilerHost);
-
-await cp(
-	resolve(presencePath, "metadata.json"),
-	resolve(presencePath, "dist/metadata.json")
-);
-watch(resolve(presencePath, "metadata.json"), () =>
-	cp(
-		resolve(presencePath, "metadata.json"),
-		resolve(presencePath, "dist/metadata.json")
-	)
-);
+compiler.watch();

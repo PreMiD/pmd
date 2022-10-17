@@ -1,7 +1,7 @@
 {
 	"name": "pmd",
 	"description": "CLI for creating, modifying & translating Presences.",
-	"version": "1.0.3",
+	"version": "1.1.0",
 	"author": "Timeraa <me@timeraa.dev>",
 	"main": "src/index.ts",
 	"license": "MPL-2.0",
@@ -35,6 +35,8 @@
 	"dependencies": {
 		"@apollo/client": "^3.6.9",
 		"chalk": "^5.0.1",
+		"chokidar": "^3.5.3",
+		"copy-webpack-plugin": "^11.0.0",
 		"cross-fetch": "^3.1.5",
 		"discord-rpc": "^4.0.1",
 		"displayastree": "^2.0.0",
@@ -46,7 +48,9 @@
 		"ora": "^6.1.2",
 		"prompts": "^2.4.2",
 		"semver": "^7.3.7",
-		"source-map-support": "^0.5.21"
+		"source-map-support": "^0.5.21",
+		"ts-loader": "^9.4.1",
+		"webpack": "^5.74.0"
 	},
 	"peerDependencies": {
 		"typescript": "^4.8.3"
