@@ -27,24 +27,6 @@ export default defineConfig({
           }
         );
       },
-    },
-    {
-      name: "ts-loader-patch",
-      setup(build) {
-        build.onLoad(
-          { filter: /ts-loader\/dist\/compilerSetup.js$/ },
-          async (args) => {
-            let contents = await fs.promises.readFile(args.path, "utf8");
-
-            contents = contents.replace(
-              "compiler = require(loaderOptions.compiler)",
-              'compiler = require(require("vscode").workspace.workspaceFolders[0].uri.fsPath + "/node_modules/" + "typescript")'
-            );
-
-            return { contents, loader: "js" };
-          }
-        );
-      },
-    },
+    }
   ],
 });

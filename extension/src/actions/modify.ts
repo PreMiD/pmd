@@ -106,6 +106,7 @@ export default async function modifyPresence(context: ExtensionContext) {
               loader: require.resolve("./ts-loader.js"),
               exclude: /node_modules/,
               options: {
+                compiler: `${workspaceFolder}/node_modules/typescript`,
                 onlyCompileBundledFiles: true,
                 errorFormatter: (error: ErrorInfo) => {
                   return (
