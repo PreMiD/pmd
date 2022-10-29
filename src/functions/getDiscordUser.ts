@@ -4,7 +4,7 @@ import { apollo } from "../util/apollo.js";
 
 export default async function getDiscordUser(id: string) {
 	const user = await apollo.query<{
-		discordUsers: ({ username?: string; discriminator?: string } | null)[];
+		discordUsers: ({ username?: string } | null)[];
 	}>({
 		query: gql`
 			query getUser($id: String) {

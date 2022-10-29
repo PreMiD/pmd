@@ -96,14 +96,14 @@ const res = await inquirer.prompt<{
 
 			metadata.author = {
 				id: input,
-				name: serviceAuthor.username + "#" + serviceAuthor.discriminator
+				name: serviceAuthor.username
 			};
 
 			return true;
 		},
 		transformer: (input: string) => {
 			return serviceAuthor
-				? serviceAuthor.username + "#" + serviceAuthor.discriminator
+				? serviceAuthor.username
 				: input;
 		}
 	},
@@ -192,7 +192,7 @@ metadata.service = res.service;
 metadata.description = { en: res.description };
 metadata.author = {
 	id: res.author,
-	name: `${serviceAuthor!.username}#${serviceAuthor!.discriminator}`
+	name: serviceAuthor!.username
 };
 metadata.url = res.url.split(",").length > 1 ? res.url.split(",") : res.url;
 metadata.logo = res.logo;
