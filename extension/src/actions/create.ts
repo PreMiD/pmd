@@ -6,12 +6,12 @@ import { resolve } from "path";
 import {
   getDiscordAppUser,
   getDiscordUser,
-  getFolderLetter,
-  isFirstTimeAuthor,
+  getFolderLetter
 } from "@pmd/cli";
 
 import { MultiStepInput } from "../util/MultiStepInput";
 
+import isFirstTimeAuthor from "../functions/isFirstTimeAuthor";
 import fetchSchema from "../functions/fetchSchema";
 import fetchTemplate from "../functions/fetchTemplate";
 
@@ -270,7 +270,7 @@ export default async function createPresence(context: ExtensionContext) {
     metadata.description = { en: state.description };
     metadata.author = {
       id: state.discordId,
-      name: `${serviceAuthor!.username}#${serviceAuthor!.discriminator}`,
+      name: serviceAuthor!.username,
     };
     metadata.url =
       state.url.split(",").length > 1 ? state.url.split(",") : state.url;
@@ -286,8 +286,7 @@ export default async function createPresence(context: ExtensionContext) {
       JSON.stringify(await fetchTemplate("tsconfig.json"), null, 2)
     );
 
-    const presenceFileToCopy = (await isFirstTimeAuthor(state.discordId),
-      `${workspaceFolder}/websites/*/*/metadata.json`)
+    const presenceFileToCopy = (await isFirstTimeAuthor(state.discordId))
       ? "presence.ts"
       : "presence.min.ts";
 

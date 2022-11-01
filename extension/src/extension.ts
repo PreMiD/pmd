@@ -1,5 +1,5 @@
 import { readFile } from "fs/promises";
-import { commands, ExtensionContext, window, workspace } from "vscode";
+import { commands, ExtensionContext, window, workspace, RelativePattern } from "vscode";
 import createPresence from "./actions/create";
 import modifyPresence from "./actions/modify";
 
@@ -18,7 +18,8 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(...disposables);
 }
 
-export const workspaceFolder = workspace.workspaceFolders?.[0].uri.fsPath;
+export const workspaceFolder = workspace.workspaceFolders?.[0].uri.fsPath as string;
+export const presencesGlobPattern = new RelativePattern(workspaceFolder, "websites/*/*/metadata.json");
 
 async function handleCommand(this: {
   name: string;

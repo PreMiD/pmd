@@ -1,14 +1,16 @@
-import { OutputChannel } from "vscode";
 import { exec } from "child_process";
 import { resolve } from "path";
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
+import chalk from "./Chalk";
+
+import OutputTerminal from "./OutputTerminal";
 
 export default class ModuleManager {
   dependencies: string[] = [];
   devDependencies: string[] = [];
 
-  constructor(public cwd: string, public outputChannel: OutputChannel) {}
+  constructor(public cwd: string, public outputChannel: OutputTerminal) { }
 
   async isValidPackageJson() {
     if (!existsSync(resolve(this.cwd, "package.json"))) return false;
@@ -26,7 +28,7 @@ export default class ModuleManager {
     delete process.env.NODE_ENV;
 
     if (!(await this.isValidPackageJson())) return;
-    this.outputChannel.appendLine("Installing dependencies...");
+    this.outputChannel.appendLine(chalk.yellow("Installing dependencies..."));
 
     //* Run npm install
     const job = exec("npm install --loglevel error --save-exact", {
@@ -41,7 +43,7 @@ export default class ModuleManager {
     await new Promise<void>((r) =>
       job.once("exit", (code) => {
         if (code === 0) {
-          this.outputChannel.appendLine("Installed dependencies!");
+          this.outputChannel.appendLine(chalk.green("Installed dependencies!"));
           return r();
         }
         this.outputChannel.appendLine(errorChunks.join(""));

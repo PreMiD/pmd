@@ -1,7 +1,8 @@
-import { commands, ExtensionContext, window } from "vscode";
-import { getFolderLetter, getPresences } from "@pmd/cli";
+import { commands, ExtensionContext, workspace, window } from "vscode";
+import { getFolderLetter } from "@pmd/cli";
 import { basename, dirname, resolve } from "path";
 import CopyPlugin from "copy-webpack-plugin";
+import chalk from "../util/Chalk";
 import { rm, writeFile } from "fs/promises";
 import { watch } from "chokidar";
 import { existsSync } from "fs";
@@ -10,9 +11,12 @@ import webpack from "webpack";
 import { ErrorInfo } from "ts-loader/dist/interfaces.js";
 
 import ModuleManager from "../util/ModuleManager.js";
-import { workspaceFolder } from "../extension.js";
+import OutputTerminal from "../util/OutputTerminal.js";
 
 import fetchTemplate from "../functions/fetchTemplate.js";
+import getPresences from "../functions/getPresences";
+
+import { workspaceFolder } from "../extension.js";
 
 export default async function modifyPresence(context: ExtensionContext) {
   if (!isTypescriptInstalled()) {
@@ -24,9 +28,13 @@ export default async function modifyPresence(context: ExtensionContext) {
   const loadingStatus = window.setStatusBarMessage(
     "$(loading~spin) Loading the Presences..."
   );
-  const presences: { service: string }[] = await getPresences(
-    `${workspaceFolder}/websites/*/*/metadata.json`
-  );
+
+  const presences: { service: string }[] = await getPresences();
+  if (!presences.length) {
+    loadingStatus.dispose();
+    return window.showErrorMessage("Failed to find any Presences.");
+  }
+
   loadingStatus.dispose();
 
   const service = (
@@ -34,6 +42,7 @@ export default async function modifyPresence(context: ExtensionContext) {
       presences.map(({ service }) => ({ label: service })),
       {
         title: "Select a presence to modify",
+        ignoreFocusOut: true
       }
     )
   )?.label;
@@ -44,8 +53,8 @@ export default async function modifyPresence(context: ExtensionContext) {
     `${workspaceFolder}/websites/${getFolderLetter(service)}/${service}`
   );
 
-  const outputChannel = window.createOutputChannel("Presence Compiler");
-  const moduleManager = new ModuleManager(presencePath, outputChannel);
+  const terminal = new OutputTerminal();
+  const moduleManager = new ModuleManager(presencePath, terminal);
   await moduleManager.installDependencies();
 
   await writeFile(
@@ -58,8 +67,8 @@ export default async function modifyPresence(context: ExtensionContext) {
   status.command = "presenceCompiler.stopCompiler";
   status.show();
 
-  outputChannel.show();
-  outputChannel.appendLine("Starting TypeScript compiler...");
+  terminal.show();
+  terminal.appendLine(chalk.greenBright("Starting TypeScript compiler..."));
 
   class Compiler {
     private compiler: webpack.Compiler | null = null;
@@ -110,23 +119,20 @@ export default async function modifyPresence(context: ExtensionContext) {
                 onlyCompileBundledFiles: true,
                 errorFormatter: (error: ErrorInfo) => {
                   return (
-                    `${basename(dirname(error.file!)) +
-                    "/" +
-                    basename(error.file!)
-                    }` +
+                    `${chalk.cyan(
+                      basename(dirname(error.file!)) + "/" + basename(error.file!)
+                    )}` +
                     ":" +
-                    error.line +
+                    chalk.yellowBright(error.line) +
                     ":" +
-                    error.character +
+                    chalk.yellowBright(error.character) +
                     " - " +
-                    "Error " +
-                    "TS" +
-                    error.code +
-                    ":" +
+                    chalk.redBright("Error ") +
+                    chalk.gray("TS" + error.code + ":") +
                     " " +
                     error.content
                   );
-                },
+                }
               },
             },
           ],
@@ -151,8 +157,8 @@ export default async function modifyPresence(context: ExtensionContext) {
 
       this.compiler.hooks.compile.tap("pmd", () => {
         if (!this.firstRun) {
-          outputChannel.clear();
-          outputChannel.appendLine("Recompiling...");
+          terminal.clear();
+          terminal.appendLine(chalk.yellowBright("Recompiling..."));
         }
         this.firstRun = false;
       });
@@ -167,20 +173,20 @@ export default async function modifyPresence(context: ExtensionContext) {
             error.name === "ModuleNotFoundError" &&
             error.message.includes(resolve(this.cwd, "package.json"))
           ) {
-            outputChannel.appendLine("package.json not valid");
+            terminal.appendLine(chalk.red("package.json not valid"));
             continue;
           }
 
-          outputChannel.appendLine(error.message);
+          terminal.appendLine(error.message);
         }
 
         if (compilation.errors.length === 0)
-          return outputChannel.appendLine("Successfully compiled!");
+          return terminal.appendLine(chalk.greenBright("Successfully compiled!"));
         else {
-          return outputChannel.appendLine(
+          return terminal.appendLine(chalk.redBright(
             `Failed to compile with ${compilation.errors.length} error${compilation.errors.length === 1 ? "" : "s"
             }!`
-          );
+          ));
         }
       });
 
@@ -212,7 +218,7 @@ export default async function modifyPresence(context: ExtensionContext) {
           ["add", "change"].includes(event) &&
           !(await moduleManager.isValidPackageJson())
         )
-          return outputChannel.appendLine("Invalid package.json");
+          return terminal.appendLine(chalk.redBright("Invalid package.json"));
 
         await compiler.stop();
 
@@ -235,7 +241,7 @@ export default async function modifyPresence(context: ExtensionContext) {
       status.text = "$(loading~spin) Stopping the compiler...";
       await compiler.stop();
       status.dispose();
-      outputChannel.dispose();
+      terminal.dispose();
       command.dispose();
     }
   );
