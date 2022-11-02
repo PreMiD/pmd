@@ -29,7 +29,7 @@ export default async function modifyPresence(context: ExtensionContext) {
     "$(loading~spin) Loading the Presences..."
   );
 
-  const presences: { service: string }[] = await getPresences();
+  const presences: { service: string, url: string | string[] }[] = await getPresences();
   if (!presences.length) {
     loadingStatus.dispose();
     return window.showErrorMessage("Failed to find any Presences.");
@@ -39,10 +39,11 @@ export default async function modifyPresence(context: ExtensionContext) {
 
   const service = (
     await window.showQuickPick(
-      presences.map(({ service }) => ({ label: service })),
+      presences.map(({ service, url }) => ({ label: service, detail: Array.isArray(url) ? url[0] : url })),
       {
         title: "Select a presence to modify",
-        ignoreFocusOut: true
+        ignoreFocusOut: true,
+        matchOnDetail: true
       }
     )
   )?.label;
