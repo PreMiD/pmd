@@ -9,6 +9,9 @@ export default defineConfig({
   },
   external: ["vscode", "pnpapi", "uglify-js", "@swc/core"],
   minify: true,
+  banner: {
+    js: 'process.env.FORCE_COLOR = "2";',
+  },
   esbuildPlugins: [
     {
       name: "webpack-patch",

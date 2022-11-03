@@ -2,7 +2,7 @@ import { commands, ExtensionContext, workspace, window } from "vscode";
 import { getFolderLetter } from "@pmd/cli";
 import { basename, dirname, resolve } from "path";
 import CopyPlugin from "copy-webpack-plugin";
-import chalk from "../util/Chalk";
+import chalk from "chalk";
 import { rm, writeFile } from "fs/promises";
 import { watch } from "chokidar";
 import { existsSync } from "fs";
@@ -18,7 +18,7 @@ import getPresences from "../functions/getPresences";
 
 import { workspaceFolder } from "../extension.js";
 
-export default async function modifyPresence(context: ExtensionContext) {
+export default async function modifyPresence(context: ExtensionContext, retry = false): Promise<any> {
   if (!isTypescriptInstalled()) {
     return window.showErrorMessage(
       "You need to have TypeScript locally installed to use this command."
@@ -30,12 +30,20 @@ export default async function modifyPresence(context: ExtensionContext) {
   );
 
   const presences: { service: string, url: string | string[] }[] = await getPresences();
-  if (!presences.length) {
-    loadingStatus.dispose();
-    return window.showErrorMessage("Failed to find any Presences.");
-  }
-
   loadingStatus.dispose();
+
+  // Sometimes it just fails to load the presences
+  if (!presences.length && !retry) {
+    window.setStatusBarMessage(
+      "$(error) Failed to load the Presences. Trying again...",
+      1000
+    );
+    return modifyPresence(context, true);
+  } else if (!presences.length) {
+    return window.showErrorMessage(
+      "Failed to load the Presences."
+    );
+  }
 
   const service = (
     await window.showQuickPick(
@@ -131,18 +139,18 @@ export default async function modifyPresence(context: ExtensionContext) {
               options: {
                 compiler: `${workspaceFolder}/node_modules/typescript`,
                 onlyCompileBundledFiles: true,
-                errorFormatter: (error: ErrorInfo) => {
+                errorFormatter: (error: ErrorInfo, colors: chalk.Chalk) => {
                   return (
-                    `${chalk.cyan(
+                    `${colors.cyan(
                       basename(dirname(error.file!)) + "/" + basename(error.file!)
                     )}` +
                     ":" +
-                    chalk.yellowBright(error.line) +
+                    colors.yellowBright(error.line) +
                     ":" +
-                    chalk.yellowBright(error.character) +
+                    colors.yellowBright(error.character) +
                     " - " +
-                    chalk.redBright("Error ") +
-                    chalk.gray("TS" + error.code + ":") +
+                    colors.redBright("Error ") +
+                    colors.gray("TS" + error.code + ":") +
                     " " +
                     error.content
                   );

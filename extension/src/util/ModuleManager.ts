@@ -2,7 +2,7 @@ import { exec } from "child_process";
 import { resolve } from "path";
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
-import chalk from "./Chalk";
+import chalk from "chalk";
 
 import OutputTerminal from "./OutputTerminal";
 
