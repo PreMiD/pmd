@@ -7,6 +7,7 @@ import ts from "typescript";
 import { fileURLToPath } from "url";
 import webpack from "webpack";
 import CopyPlugin from "copy-webpack-plugin";
+import { createRequire } from "module";
 
 import getFolderLetter from "../functions/getFolderLetter.js";
 import getPresences from "../functions/getPresences.js";
@@ -30,6 +31,7 @@ const { service } = await prompts({
 
 if (!service) process.exit(0);
 
+const require = createRequire(import.meta.url);
 const presencePath = resolve(
 	`./websites/${getFolderLetter(service)}/${service}`
 );
@@ -49,7 +51,7 @@ class Compiler {
 	private watching: webpack.Watching | null = null;
 	public firstRun = true;
 
-	constructor(private cwd: string) {}
+	constructor(private cwd: string) { }
 
 	async watch() {
 		this.compiler = webpack({
@@ -101,7 +103,7 @@ class Compiler {
 				rules: [
 					{
 						test: /\.ts$/,
-						loader: "ts-loader",
+						loader: require.resolve("ts-loader"),
 						exclude: /node_modules/,
 						options: {
 							onlyCompileBundledFiles: true,
@@ -173,8 +175,7 @@ class Compiler {
 				return console.log(
 					prefix,
 					chalk.redBright(
-						`Failed to compile with ${compilation.errors.length} error${
-							compilation.errors.length === 1 ? "" : "s"
+						`Failed to compile with ${compilation.errors.length} error${compilation.errors.length === 1 ? "" : "s"
 						}!`
 					)
 				);
