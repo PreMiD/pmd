@@ -1,10 +1,10 @@
 import { readFile } from "fs/promises";
 import { globby } from "globby";
 
-export default async function getPresences(custuomPath?: string) {
+export default async function getPresences() {
   return await Promise.all(
     (
-      await globby(custuomPath ?? "websites/*/*/metadata.json")
+      await globby("websites/*/*/metadata.json")
     ).map(async (s) => JSON.parse(await readFile(s, "utf-8")))
   );
 }

@@ -1,1 +1,1 @@
-export default function getPresences(custuomPath?: string): Promise<any[]>;
+export default function getPresences(): Promise<any[]>;

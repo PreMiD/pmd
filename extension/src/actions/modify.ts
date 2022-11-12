@@ -1,4 +1,4 @@
-import { commands, ExtensionContext, workspace, window } from "vscode";
+import { commands, ExtensionContext, window } from "vscode";
 import { getFolderLetter } from "@pmd/cli";
 import { basename, dirname, resolve } from "path";
 import CopyPlugin from "copy-webpack-plugin";
@@ -10,13 +10,12 @@ import webpack from "webpack";
 
 import { ErrorInfo } from "ts-loader/dist/interfaces.js";
 
-import ModuleManager from "../util/ModuleManager.js";
 import OutputTerminal from "../util/OutputTerminal.js";
-
 import fetchTemplate from "../functions/fetchTemplate.js";
 import getPresences from "../functions/getPresences";
-
 import { workspaceFolder } from "../extension.js";
+
+import { ModuleManager } from "@pmd/cli";
 
 export default async function modifyPresence(context: ExtensionContext, retry = false): Promise<any> {
   if (!isTypescriptInstalled()) {

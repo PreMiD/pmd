@@ -1,1 +1,1 @@
-export default function isFirstTimeAuthor(author: string, custuomPath?: string): Promise<boolean>;
+export default function isFirstTimeAuthor(author: string): Promise<boolean>;

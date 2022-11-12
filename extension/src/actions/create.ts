@@ -6,13 +6,13 @@ import { resolve } from "path";
 import {
   getDiscordAppUser,
   getDiscordUser,
-  getFolderLetter
+  getFolderLetter,
+  fetchSchema
 } from "@pmd/cli";
 
 import { MultiStepInput } from "../util/MultiStepInput";
 
 import isFirstTimeAuthor from "../functions/isFirstTimeAuthor";
-import fetchSchema from "../functions/fetchSchema";
 import fetchTemplate from "../functions/fetchTemplate";
 
 export default async function createPresence(context: ExtensionContext) {
