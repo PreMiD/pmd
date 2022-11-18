@@ -1,4 +1,5 @@
 import { EventEmitter, Terminal, window, ThemeIcon, commands } from "vscode"
+import chalk from "chalk";
 
 export default class OutputTerminal {
     private terminal: Terminal
@@ -27,6 +28,12 @@ export default class OutputTerminal {
         for (const message of messages)
             this.append(`${message}\r\n`)
     }
+
+    log = this.appendLine;
+    error(...messages: string[]): void {
+        for (const message of messages)
+            this.append(`${chalk.redBright(message)}\r\n`)
+    };
 
     clear(): void {
         this.append('\x1bc\x1b[0J\x1b[1J\x1b[2J\x1b[3J\x1b[0;0H');

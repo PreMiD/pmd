@@ -1,21 +1,16 @@
 import { commands, ExtensionContext, window } from "vscode";
-import { getFolderLetter } from "@pmd/cli";
-import { basename, dirname, resolve } from "path";
-import CopyPlugin from "copy-webpack-plugin";
+import { basename, resolve } from "path";
 import chalk from "chalk";
 import { rm, writeFile } from "fs/promises";
 import { watch } from "chokidar";
 import { existsSync } from "fs";
-import webpack from "webpack";
-
-import { ErrorInfo } from "ts-loader/dist/interfaces.js";
 
 import OutputTerminal from "../util/OutputTerminal.js";
 import fetchTemplate from "../functions/fetchTemplate.js";
 import getPresences from "../functions/getPresences";
 import { workspaceFolder } from "../extension.js";
 
-import { ModuleManager } from "@pmd/cli";
+import { getFolderLetter, ModuleManager, Compiler } from "@pmd/cli";
 
 export default async function modifyPresence(context: ExtensionContext, retry = false): Promise<any> {
   if (!isTypescriptInstalled()) {
@@ -62,6 +57,8 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
   );
 
   const terminal = new OutputTerminal();
+  terminal.show();
+
   const moduleManager = new ModuleManager(presencePath, terminal);
   await moduleManager.installDependencies();
 
@@ -75,158 +72,14 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
   status.command = "presenceCompiler.stopCompiler";
   status.show();
 
-  terminal.show();
   terminal.appendLine(chalk.greenBright("Starting TypeScript compiler..."));
+  const compiler = new Compiler(presencePath, {
+    terminal,
+    usePrefix: false
+  });
 
-  class Compiler {
-    private compiler: webpack.Compiler | null = null;
-    private watching: webpack.Watching | null = null;
-    public firstRun = true;
-
-    constructor(private cwd: string) { }
-
-    async watch() {
-      status.text = "$(stop) Stop watching for changes";
-      this.compiler = webpack({
-        mode: "none",
-        devtool: "inline-source-map",
-        plugins: [
-          new webpack.DynamicEntryPlugin(this.cwd, async () => {
-            return new Promise((r) => {
-              if (existsSync(resolve(this.cwd, "iframe.ts")))
-                r({
-                  "iframe.js": {
-                    filename: "iframe.js",
-                    baseUri: this.cwd,
-                    import: ["./iframe.ts"],
-                  },
-                });
-              else r({});
-            });
-          }),
-          new CopyPlugin({
-            patterns: [
-              {
-                from: resolve(this.cwd, "metadata.json"),
-                to: "metadata.json",
-              },
-            ],
-          }),
-          new webpack.WatchIgnorePlugin({
-            paths: [/\.js$/, /\.d\.[cm]ts$/],
-          }),
-          {
-            apply(compiler) {
-              compiler.hooks.emit.tap("PresenceCompiler", compilation => {
-                //* Add empty line after file content to prevent errors from PreMiD
-                for (const file in compilation.assets) {
-                  //* Check if file is a .js file
-                  if (!file.endsWith(".js")) continue;
-                  //@ts-expect-error - This is defined. (ConcatSource class)
-                  compilation.assets[file].add("\n");
-                }
-              });
-            }
-          }
-        ],
-        module: {
-          rules: [
-            {
-              test: /\.ts$/,
-              loader: require.resolve("./ts-loader.js"),
-              exclude: /node_modules/,
-              options: {
-                compiler: `${workspaceFolder}/node_modules/typescript`,
-                onlyCompileBundledFiles: true,
-                errorFormatter: (error: ErrorInfo, colors: chalk.Chalk) => {
-                  return (
-                    `${colors.cyan(
-                      basename(dirname(error.file!)) + "/" + basename(error.file!)
-                    )}` +
-                    ":" +
-                    colors.yellowBright(error.line) +
-                    ":" +
-                    colors.yellowBright(error.character) +
-                    " - " +
-                    colors.redBright("Error ") +
-                    colors.gray("TS" + error.code + ":") +
-                    " " +
-                    error.content
-                  );
-                }
-              },
-            },
-          ],
-        },
-        resolve: {
-          extensions: [".ts"],
-        },
-        entry: async () => {
-          const output: Record<string, string> = {
-            presence: resolve(this.cwd, "presence.ts"),
-          };
-
-          return output;
-        },
-        output: {
-          path: resolve(this.cwd, "dist"),
-          filename: "[name].js",
-          iife: false,
-          clean: true,
-        },
-      });
-
-      this.compiler.hooks.compile.tap("pmd", () => {
-        if (!this.firstRun) {
-          terminal.clear();
-          terminal.appendLine(chalk.yellowBright("Recompiling..."));
-        }
-        this.firstRun = false;
-      });
-
-      this.compiler.hooks.afterCompile.tap("pmd", (compilation) => {
-        compilation.errors = compilation.errors.filter(
-          (e) => e.name !== "ModuleBuildError"
-        );
-
-        for (const error of compilation.errors) {
-          if (
-            error.name === "ModuleNotFoundError" &&
-            error.message.includes(resolve(this.cwd, "package.json"))
-          ) {
-            terminal.appendLine(chalk.red("package.json not valid"));
-            continue;
-          }
-
-          terminal.appendLine(error.message);
-        }
-
-        if (compilation.errors.length === 0)
-          return terminal.appendLine(chalk.greenBright("Successfully compiled!"));
-        else {
-          return terminal.appendLine(chalk.redBright(
-            `Failed to compile with ${compilation.errors.length} error${compilation.errors.length === 1 ? "" : "s"
-            }!`
-          ));
-        }
-      });
-
-      await new Promise((r) => (this.watching = this.compiler!.watch({}, r)));
-    }
-
-    async stop() {
-      this.watching?.suspend();
-      if (this.watching) await new Promise((r) => this.watching?.close(r));
-    }
-
-    async restart() {
-      this.firstRun = true;
-      await this.stop();
-      await this.watch();
-    }
-  }
-
-  const compiler = new Compiler(presencePath);
+  compiler.onStart = () => status.text = "$(stop) Stop watching for changes";
+  compiler.onRecompile = () => terminal.clear();
 
   watch(presencePath, { depth: 0, persistent: true, ignoreInitial: true }).on(
     "all",
@@ -267,7 +120,10 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
     }
   );
 
-  compiler.watch();
+  compiler.watch({
+    compiler: `${workspaceFolder}/node_modules/typescript`,
+    loader: require.resolve("./ts-loader.js")
+  });
 }
 
 function isTypescriptInstalled() {

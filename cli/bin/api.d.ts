@@ -5,3 +5,4 @@ export { default as getPresences } from "./functions/getPresences";
 export { default as fetchSchema } from "./functions/fetchSchema";
 export { default as isFirstTimeAuthor } from "./functions/isFirstTimeAuthor";
 export { default as ModuleManager } from "./util/ModuleManager";
+export { default as Compiler } from "./util/PresenceCompiler";

@@ -21,9 +21,27 @@ export default defineConfig({
           async (args) => {
             let contents = await fs.promises.readFile(args.path, "utf8");
 
-            contents = contents.replaceAll(
-              'require.resolve("watchpack")',
+            contents = contents.replace(
+              /require\.resolve\("watchpack"\)/g,
               '""'
+            );
+
+            return { contents, loader: "js" };
+          }
+        );
+      },
+    },
+    {
+      name: "presence-compiler-patch",
+      setup(build) {
+        build.onLoad(
+          { filter: /PresenceCompiler.js$/ },
+          async (args) => {
+            let contents = await fs.promises.readFile(args.path, "utf8");
+
+            contents = contents.replace(
+              `[fileURLToPath(new URL("../../node_modules", ${"import.meta.url"}))]`,
+              'undefined'
             );
 
             return { contents, loader: "js" };
