@@ -1,16 +1,18 @@
 import { basename, dirname, resolve } from "node:path";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import { existsSync } from "node:fs";
+import { existsSync, promises as fs } from "node:fs";
 
 import webpack from "webpack";
 import CopyPlugin from "copy-webpack-plugin";
+
 import chalk, { ChalkInstance } from "chalk";
+import { watch } from "chokidar";
 
 import { ErrorInfo } from "ts-loader/dist/interfaces";
 import ts from "typescript";
 
-import { prefix as utilPrefix } from "./prefix";
+import { prefix as utilPrefix } from "./prefix.js";
+import ModuleManager from "./ModuleManager.js";
 import { OutputTerminal } from "@ext/index";
 
 export default class Compiler {
@@ -18,7 +20,7 @@ export default class Compiler {
 	private watching: webpack.Watching | null = null;
 	private output: Console | OutputTerminal = console;
 
-	prefix = utilPrefix;
+	prefix = utilPrefix + " ";
 
 	public onStart?: () => void;
 	public onRecompile?: () => void;
@@ -31,6 +33,36 @@ export default class Compiler {
 	} = {}) {
 		if (this.options.terminal) this.output = this.options.terminal;
 		if (this.options.usePrefix === false) this.prefix = "";
+
+		const moduleManager = new ModuleManager(this.cwd, this.options.terminal);
+
+		watch(this.cwd, { depth: 0, persistent: true, ignoreInitial: true }).on(
+			"all",
+			async (event, file) => {
+				if (["add", "unlink"].includes(event) && basename(file) === "iframe.ts")
+					return await this.restart();
+
+				if (basename(file) === "package.json") {
+					if (
+						["add", "change"].includes(event) &&
+						!(await moduleManager.isValidPackageJson())
+					)
+						return this.output.error(`${this.prefix}${chalk.redBright("Invalid package.json!")}`);
+
+					await this.stop();
+
+					if ("change" === event) await moduleManager.installDependencies();
+					else if (event === "unlink") {
+						if (existsSync(resolve(this.cwd, "node_modules")))
+							fs.rm(resolve(this.cwd, "node_modules"), { recursive: true });
+						if (existsSync(resolve(this.cwd, "package-lock.json")))
+							fs.rm(resolve(this.cwd, "package-lock.json"));
+					}
+
+					this.restart();
+				}
+			}
+		);
 	}
 
 	async watch(options: {

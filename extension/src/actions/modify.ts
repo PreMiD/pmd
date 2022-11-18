@@ -59,9 +59,6 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
   const terminal = new OutputTerminal();
   terminal.show();
 
-  const moduleManager = new ModuleManager(presencePath, terminal);
-  await moduleManager.installDependencies();
-
   await writeFile(
     resolve(presencePath, "tsconfig.json"),
     JSON.stringify(await fetchTemplate("tsconfig.json"), null, 2)
@@ -80,34 +77,6 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
 
   compiler.onStart = () => status.text = "$(stop) Stop watching for changes";
   compiler.onRecompile = () => terminal.clear();
-
-  watch(presencePath, { depth: 0, persistent: true, ignoreInitial: true }).on(
-    "all",
-    async (event, file) => {
-      if (["add", "unlink"].includes(event) && basename(file) === "iframe.ts")
-        return await compiler.restart();
-
-      if (basename(file) === "package.json") {
-        if (
-          ["add", "change"].includes(event) &&
-          !(await moduleManager.isValidPackageJson())
-        )
-          return terminal.appendLine(chalk.redBright("Invalid package.json"));
-
-        await compiler.stop();
-
-        if ("change" === event) await moduleManager.installDependencies();
-        else if (event === "unlink") {
-          if (existsSync(resolve(presencePath, "node_modules")))
-            rm(resolve(presencePath, "node_modules"), { recursive: true });
-          if (existsSync(resolve(presencePath, "package-lock.json")))
-            rm(resolve(presencePath, "package-lock.json"));
-        }
-
-        compiler.restart();
-      }
-    }
-  );
 
   const command = commands.registerCommand(
     "presenceCompiler.stopCompiler",
