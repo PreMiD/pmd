@@ -1,8 +1,8 @@
 import { window, ExtensionContext, Uri, ThemeIcon } from "vscode";
+import { access, mkdir, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+
 import { Validator } from "jsonschema";
-import { access, mkdir, writeFile } from "fs/promises";
-import { workspaceFolder } from "../extension";
-import { resolve } from "path";
 import {
   getDiscordAppUser,
   getDiscordUser,
@@ -14,6 +14,8 @@ import { MultiStepInput } from "../util/MultiStepInput";
 
 import isFirstTimeAuthor from "../functions/isFirstTimeAuthor";
 import fetchTemplate from "../functions/fetchTemplate";
+
+import { workspaceFolder } from "../extension";
 
 export default async function createPresence(context: ExtensionContext) {
   interface State {

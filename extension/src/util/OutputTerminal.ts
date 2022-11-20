@@ -1,4 +1,6 @@
 import { EventEmitter, Terminal, window, ThemeIcon, commands } from "vscode"
+
+import { format } from "node:util";
 import chalk from "chalk";
 
 export default class OutputTerminal {
@@ -20,19 +22,17 @@ export default class OutputTerminal {
     }
 
     append(...messages: string[]): void {
-        for (const message of messages)
-            this.emitter.fire(message)
+        this.emitter.fire(format(...messages));
     }
 
     appendLine(...messages: string[]): void {
-        for (const message of messages)
-            this.append(`${message}\r\n`)
+        this.append(`${format(...messages)}\r\n`);
     }
 
     log = this.appendLine;
     error(...messages: string[]): void {
-        for (const message of messages)
-            this.append(`${chalk.redBright(message)}\r\n`)
+        messages = messages.map(message => chalk.red(message));
+        this.appendLine(...messages);
     };
 
     clear(): void {
