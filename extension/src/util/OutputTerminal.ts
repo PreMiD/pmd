@@ -31,8 +31,7 @@ export default class OutputTerminal {
 
     log = this.appendLine;
     error(...messages: string[]): void {
-        messages = messages.map(message => chalk.red(message));
-        this.appendLine(...messages);
+        this.appendLine(chalk.red(format(...messages)));
     };
 
     clear(): void {
