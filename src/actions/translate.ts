@@ -165,7 +165,7 @@ async function translatePresences(presences: any, lang: string) {
 
 		await writeFile(
 			resolve(presencePath, "dist/metadata.json"),
-			JSON.stringify(presence, null, 2)
+			JSON.stringify(presence, null, "\t")
 		);
 	}
 }
