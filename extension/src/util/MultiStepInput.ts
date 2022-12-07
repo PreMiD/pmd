@@ -155,7 +155,10 @@ export class MultiStepInput {
           ...(buttons || []),
         ];
         input.ignoreFocusOut = true;
-        let validating = validate("");
+
+        let validating = validate(""),
+          timeout: NodeJS.Timeout;
+
         disposables.push(
           input.onDidTriggerButton((item: CustomButton<InputBox>) => {
             if (item === QuickInputButtons.Back) reject(InputFlowAction.back);
@@ -173,8 +176,12 @@ export class MultiStepInput {
             const current = validate(text);
             validating = current;
             const validationMessage = await current;
+
             if (current === validating) {
+              if (timeout) clearTimeout(timeout);
+
               input.validationMessage = validationMessage;
+              timeout = setTimeout(() => input.validationMessage = undefined, 2500);
             }
           }),
           input.onDidHide(() => {

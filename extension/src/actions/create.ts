@@ -123,7 +123,7 @@ export default async function createPresence(context: ExtensionContext) {
       value: state.url || "",
       prompt: "URL of the website (separate multiple URLs with a comma)",
       validate: async (input: string) => {
-        if (!input) return "URL cannot be empty";
+        if (!input) return "Website URL cannot be empty";
         const schemaRes = validator.validate(
           input.includes(",") ? input.split(",") : input,
           schema.properties.url
@@ -144,7 +144,7 @@ export default async function createPresence(context: ExtensionContext) {
       value: state.logo || "",
       prompt: "Imgur URL of the logo",
       validate: async (input: string) => {
-        if (!input) return "Logo cannot be empty";
+        if (!input) return "Logo URL cannot be empty";
         const schemaRes = validator.validate(input, schema.properties.logo);
 
         if (!schemaRes.valid) return schemaRes.errors[0].message;
@@ -162,7 +162,7 @@ export default async function createPresence(context: ExtensionContext) {
       value: state.thumbnail || "",
       prompt: "Imgur URL of the thumbnail",
       validate: async (input: string) => {
-        if (!input) return "Logo cannot be empty";
+        if (!input) return "Thumbnail URL cannot be empty";
         const schemaRes = validator.validate(
           input,
           schema.properties.thumbnail
@@ -183,7 +183,7 @@ export default async function createPresence(context: ExtensionContext) {
       value: state.color || "",
       prompt: "Theme color (Hex) of the Presence",
       validate: async (input: string) => {
-        if (!input) return "Color cannot be empty";
+        if (!input) return "Theme Color cannot be empty";
         const schemaRes = validator.validate(input, schema.properties.color);
 
         if (!schemaRes.valid) return schemaRes.errors[0].message;
