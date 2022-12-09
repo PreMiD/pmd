@@ -240,7 +240,7 @@ export default async function createPresence(context: ExtensionContext) {
   async function serviceExists(service: string) {
     try {
       await access(
-        `${workspaceFolder}/websites/${service.at(0)!.toUpperCase()}/${service}`
+        `${workspaceFolder}/websites/${getFolderLetter(service)}/${service}`
       );
       return true;
     } catch {

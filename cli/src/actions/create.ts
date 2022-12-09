@@ -228,7 +228,7 @@ console.log(prefix, chalk.green("Presence created! You can now start coding!"));
 
 async function serviceExists(service: string) {
 	try {
-		await access(`./websites/${service.at(0)!.toUpperCase()}/${service}`);
+		await access(`./websites/${getFolderLetter(service)}/${service}`);
 		return true;
 	} catch {
 		return false;
