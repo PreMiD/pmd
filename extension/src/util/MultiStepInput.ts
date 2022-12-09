@@ -37,6 +37,7 @@ export interface InputBoxParameters {
   step: number;
   totalSteps: number;
   value: string;
+  placeHolder?: string;
   prompt: string;
   validate: (value: string) => Promise<string | undefined>;
   buttons?: CustomButton<InputBox>[];
@@ -51,15 +52,23 @@ export class MultiStepInput {
 
   private current?: QuickInput;
   private steps: InputStep[] = [];
+  private timeouts: Record<string, NodeJS.Timeout> = {};
 
+  private setTimeout(action: () => void, timeout = 1500, id = "default") {
+    if (this.timeouts[id]) clearTimeout(this.timeouts[id]);
+    this.timeouts[id] = setTimeout(action, timeout);
+  }
+  
   private async stepThrough<T>(start: InputStep) {
     let step: InputStep | void = start;
     while (step) {
       this.steps.push(step);
+
       if (this.current) {
         this.current.enabled = false;
         this.current.busy = true;
       }
+
       try {
         step = await step(this);
       } catch (err) {
@@ -120,9 +129,10 @@ export class MultiStepInput {
             })().catch(reject);
           })
         );
-        if (this.current) {
+
+        if (this.current)
           this.current.dispose();
-        }
+        
         this.current = input;
         this.current.show();
       });
@@ -136,6 +146,7 @@ export class MultiStepInput {
     step,
     totalSteps,
     value,
+    placeHolder,
     prompt,
     validate,
     buttons,
@@ -149,6 +160,7 @@ export class MultiStepInput {
         input.step = step;
         input.totalSteps = totalSteps;
         input.value = value || "";
+        input.placeholder = placeHolder;
         input.prompt = prompt;
         input.buttons = [
           ...(this.steps.length > 1 ? [QuickInputButtons.Back] : []),
@@ -156,8 +168,7 @@ export class MultiStepInput {
         ];
         input.ignoreFocusOut = true;
 
-        let validating = validate(""),
-          timeout: NodeJS.Timeout;
+        let validating = validate("");
 
         disposables.push(
           input.onDidTriggerButton((item: CustomButton<InputBox>) => {
@@ -168,7 +179,13 @@ export class MultiStepInput {
             const value = input.value;
             input.enabled = false;
             input.busy = true;
-            if (!(await validate(value))) resolve(value);
+
+            const error = await validate(value)
+            if (error) {
+              input.validationMessage = error;
+              this.setTimeout(() => input.validationMessage = undefined);
+            } else resolve(value);
+
             input.enabled = true;
             input.busy = false;
           }),
@@ -178,10 +195,8 @@ export class MultiStepInput {
             const validationMessage = await current;
 
             if (current === validating) {
-              if (timeout) clearTimeout(timeout);
-
               input.validationMessage = validationMessage;
-              timeout = setTimeout(() => input.validationMessage = undefined, 2500);
+              this.setTimeout(() => input.validationMessage = undefined);
             }
           }),
           input.onDidHide(() => {
@@ -194,9 +209,10 @@ export class MultiStepInput {
             })().catch(reject);
           })
         );
-        if (this.current) {
+
+        if (this.current)
           this.current.dispose();
-        }
+
         this.current = input;
         this.current.show();
       });

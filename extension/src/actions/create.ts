@@ -121,6 +121,7 @@ export default async function createPresence(context: ExtensionContext) {
       step: 4,
       totalSteps: 7,
       value: state.url || "",
+      placeHolder: "premid.app, docs.premid.app",
       prompt: "URL of the website (separate multiple URLs with a comma)",
       validate: async (input: string) => {
         if (!input) return "Website URL cannot be empty";
@@ -143,6 +144,7 @@ export default async function createPresence(context: ExtensionContext) {
       totalSteps: 7,
       value: state.logo || "",
       prompt: "Imgur URL of the logo",
+      placeHolder: "https://i.imgur.com/xXxXxXx.png",
       validate: async (input: string) => {
         if (!input) return "Logo URL cannot be empty";
         const schemaRes = validator.validate(input, schema.properties.logo);
@@ -161,6 +163,7 @@ export default async function createPresence(context: ExtensionContext) {
       totalSteps: 7,
       value: state.thumbnail || "",
       prompt: "Imgur URL of the thumbnail",
+      placeHolder: "https://i.imgur.com/xXxXxXx.png",
       validate: async (input: string) => {
         if (!input) return "Thumbnail URL cannot be empty";
         const schemaRes = validator.validate(
@@ -181,6 +184,7 @@ export default async function createPresence(context: ExtensionContext) {
       step: 7,
       totalSteps: 8,
       value: state.color || "",
+      placeHolder: "#000000",
       prompt: "Theme color (Hex) of the Presence",
       validate: async (input: string) => {
         if (!input) return "Theme Color cannot be empty";
