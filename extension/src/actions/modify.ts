@@ -1,17 +1,21 @@
 import { commands, ExtensionContext, window } from "vscode";
-import { basename, resolve } from "path";
+import { writeFile } from "fs/promises";
+import { resolve } from "path";
 import chalk from "chalk";
-import { rm, writeFile } from "fs/promises";
-import { watch } from "chokidar";
-import { existsSync } from "fs";
 
 import OutputTerminal from "../util/OutputTerminal.js";
 import fetchTemplate from "../functions/fetchTemplate.js";
 import getPresences from "../functions/getPresences";
 import { workspaceFolder } from "../extension.js";
 
-import { getFolderLetter, ModuleManager, Compiler } from "@pmd/cli";
+import { getFolderLetter, Compiler } from "@pmd/cli";
 
+interface Presence {
+  service: string;
+  url: string | string[];
+}
+
+const runningInstances: { [key: string]: string } = {};
 export default async function modifyPresence(context: ExtensionContext, retry = false): Promise<any> {
   if (!isTypescriptInstalled()) {
     return window.showErrorMessage(
@@ -19,11 +23,12 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
     );
   }
 
+  const instanceId = Math.random().toString(36).slice(2);
   const loadingStatus = window.setStatusBarMessage(
     "$(loading~spin) Loading the Presences..."
   );
 
-  const presences: { service: string, url: string | string[] }[] = await getPresences();
+  const presences: Presence[] = (await getPresences()).filter(({ service }: Presence) => !isAlreadyBeingModified(service));
   loadingStatus.dispose();
 
   // Sometimes it just fails to load the presences
@@ -52,11 +57,12 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
 
   if (!service) return;
 
+  runningInstances[instanceId] = service;
   const presencePath = resolve(
     `${workspaceFolder}/websites/${getFolderLetter(service)}/${service}`
   );
 
-  const terminal = new OutputTerminal();
+  const terminal = new OutputTerminal(service);
   terminal.show();
 
   await writeFile(
@@ -66,7 +72,7 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
 
   const status = window.createStatusBarItem();
   status.text = "$(loading~spin) Starting TypeScript compiler...";
-  status.command = "presenceCompiler.stopCompiler";
+  status.command = `presenceCompiler.stopCompiler-${instanceId}`;
   status.show();
 
   terminal.appendLine(chalk.greenBright("Starting TypeScript compiler..."));
@@ -79,9 +85,10 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
   compiler.onRecompile = () => terminal.clear();
 
   const command = commands.registerCommand(
-    "presenceCompiler.stopCompiler",
+    `presenceCompiler.stopCompiler-${instanceId}`,
     async () => {
       status.text = "$(loading~spin) Stopping the compiler...";
+      delete runningInstances[instanceId];
       await compiler.stop();
       status.dispose();
       terminal.dispose();
@@ -93,6 +100,10 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
     compiler: `${workspaceFolder}/node_modules/typescript`,
     loader: require.resolve("./ts-loader.js")
   });
+}
+
+function isAlreadyBeingModified(service: string) {
+  return Object.values(runningInstances).includes(service);
 }
 
 function isTypescriptInstalled() {

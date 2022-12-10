@@ -7,10 +7,10 @@ export default class OutputTerminal {
     private terminal: Terminal
     private emitter: EventEmitter<string>
 
-    constructor() {
+    constructor(service: string) {
         this.emitter = new EventEmitter<string>();
         this.terminal = window.createTerminal({
-            name: 'Presence Compiler',
+            name: `${service} - Presence Compiler`,
             iconPath: new ThemeIcon('package'),
             pty: {
                 open: () => null,
