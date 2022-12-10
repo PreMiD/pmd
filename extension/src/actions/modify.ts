@@ -81,7 +81,7 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
     usePrefix: false
   });
 
-  compiler.onStart = () => status.text = "$(stop) Stop watching for changes";
+  compiler.onStart = () => status.text = `$(stop) Stop compiling - ${service}`;
   compiler.onRecompile = () => terminal.clear();
 
   const command = commands.registerCommand(
