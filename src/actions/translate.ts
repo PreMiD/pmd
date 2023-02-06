@@ -152,7 +152,7 @@ async function translatePresences(presences: any, lang: string) {
 		if (translation === "stop") break;
 
 		const presencePath = resolve(
-			`./websites/${getFolderLetter(presence.service)}/${presence.service}`
+			`./websites/${getFolderLetter(presence.service)}/${presence.service.replace("!", " ")}`
 		);
 
 		presence.description[lang] = translation;
