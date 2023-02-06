@@ -1,5 +1,7 @@
 import { window, ExtensionContext, Uri, ThemeIcon } from "vscode";
+
 import { access, mkdir, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { Validator } from "jsonschema";
@@ -7,7 +9,7 @@ import {
   getDiscordAppUser,
   getDiscordUser,
   getFolderLetter,
-  fetchSchema
+  fetchSchema,
 } from "@pmd/cli";
 
 import { MultiStepInput } from "../util/MultiStepInput";
@@ -15,7 +17,7 @@ import { MultiStepInput } from "../util/MultiStepInput";
 import isFirstTimeAuthor from "../functions/isFirstTimeAuthor";
 import fetchTemplate from "../functions/fetchTemplate";
 
-import { workspaceFolder } from "../extension";
+import { installDependencies, workspaceFolder } from "../extension";
 
 export default async function createPresence(context: ExtensionContext) {
   interface State {
@@ -309,15 +311,29 @@ export default async function createPresence(context: ExtensionContext) {
     window
       .showInformationMessage(
         "Presence created! You can now start coding!",
-        "Open presence.ts"
+        "Open presence.ts",
+        "Open metadata.json"
       )
       .then((choice) => {
-        if (choice === "Open presence.ts") {
-          window.showTextDocument(
-            Uri.file(resolve(presencePath, "presence.ts"))
-          );
+        switch (choice) {
+          case "Open presence.ts":
+            window.showTextDocument(
+              Uri.file(resolve(presencePath, "presence.ts"))
+            );
+            break;
+          case "Open metadata.json":
+            window.showTextDocument(
+              Uri.file(resolve(presencePath, "metadata.json"))
+            );
+            break;
         }
       });
+
+    if (!existsSync(resolve(workspaceFolder, "node_modules"))) {
+      window.showInformationMessage("You don't have the dependencies installed, do you want to install them now?", "Yes").then(async (choice) => {
+        if (choice === "Yes") installDependencies();
+      });
+    }
   }
 }
 

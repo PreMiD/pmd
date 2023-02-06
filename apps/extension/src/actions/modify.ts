@@ -1,14 +1,18 @@
-import { commands, ExtensionContext, window } from "vscode";
-import { writeFile } from "fs/promises";
-import { resolve } from "path";
+import { commands, ExtensionContext, Uri, window } from "vscode";
+
+import { writeFile } from "node:fs/promises";
+import { unescape } from "node:querystring";
+import { resolve } from "node:path";
+
 import chalk from "chalk";
 
 import OutputTerminal from "../util/OutputTerminal.js";
 import fetchTemplate from "../functions/fetchTemplate.js";
 import getPresences from "../functions/getPresences";
-import { workspaceFolder } from "../extension.js";
+import { installDependencies, workspaceFolder } from "../extension.js";
 
 import { getFolderLetter, Compiler } from "@pmd/cli";
+import { existsSync } from "node:fs";
 
 interface Presence {
   service: string;
@@ -17,18 +21,28 @@ interface Presence {
 
 const runningInstances: { [key: string]: string } = {};
 export default async function modifyPresence(context: ExtensionContext, retry = false): Promise<any> {
-  if (!isTypescriptInstalled()) {
+  if (!areDependenciesInstalled()) {
     return window.showErrorMessage(
-      "You need to have TypeScript locally installed to use this command."
-    );
+      "You need to have the dependencies installed to use this command.",
+      "Install Dependencies"
+    ).then(async (choice) => {
+      if (choice === "Install Dependencies") {
+        installDependencies()
+          .then(() => {
+            window.showInformationMessage("Rerun the commmand?", "Yes").then((choice) => {
+              if (choice === "Yes") modifyPresence(context);
+            });
+          })
+          .catch(() => { });
+      }
+    });
   }
 
-  const instanceId = Math.random().toString(36).slice(2);
   const loadingStatus = window.setStatusBarMessage(
     "$(loading~spin) Loading the Presences..."
   );
 
-  const presences: Presence[] = (await getPresences()).filter(({ service }: Presence) => !isAlreadyBeingModified(service));
+  const presences: Presence[] = (await getPresences()).filter(({ service }: Presence) => !isBeingModified(service));
   loadingStatus.dispose();
 
   // Sometimes it just fails to load the presences
@@ -57,7 +71,9 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
 
   if (!service) return;
 
+  const instanceId = Buffer.from(unescape(encodeURIComponent(service))).toString("base64");
   runningInstances[instanceId] = service;
+
   const presencePath = resolve(
     `${workspaceFolder}/websites/${getFolderLetter(service)}/${service}`
   );
@@ -72,7 +88,7 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
 
   const status = window.createStatusBarItem();
   status.text = "$(loading~spin) Starting TypeScript compiler...";
-  status.command = `presenceCompiler.stopCompiler-${instanceId}`;
+  status.command = `stopCompiler-${instanceId}`;
   status.show();
 
   terminal.appendLine(chalk.greenBright("Starting TypeScript compiler..."));
@@ -81,11 +97,28 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
     usePrefix: false
   });
 
-  compiler.onStart = () => status.text = `$(stop) Stop compiling - ${service}`;
+  compiler.onStart = () => {
+    status.text = `$(stop) Stop compiling - ${service}`;
+
+    window.showInformationMessage(`Compiler started for ${service}`, "Open presence.ts", "Open metadata.json").then((choice) => {
+      switch (choice) {
+        case "Open presence.ts":
+          window.showTextDocument(
+            Uri.file(resolve(presencePath, "presence.ts"))
+          );
+          break;
+        case "Open metadata.json":
+          window.showTextDocument(
+            Uri.file(resolve(presencePath, "metadata.json"))
+          );
+          break;
+      }
+    });
+  };
   compiler.onRecompile = () => terminal.clear();
 
   const command = commands.registerCommand(
-    `presenceCompiler.stopCompiler-${instanceId}`,
+    `stopCompiler-${instanceId}`,
     async () => {
       status.text = "$(loading~spin) Stopping the compiler...";
       delete runningInstances[instanceId];
@@ -102,15 +135,10 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
   });
 }
 
-function isAlreadyBeingModified(service: string) {
+export function isBeingModified(service: string) {
   return Object.values(runningInstances).includes(service);
 }
 
-function isTypescriptInstalled() {
-  try {
-    require(`${workspaceFolder}/node_modules/typescript`);
-    return true;
-  } catch {
-    return false;
-  }
+function areDependenciesInstalled() {
+  return existsSync(`${workspaceFolder}/node_modules`);
 }

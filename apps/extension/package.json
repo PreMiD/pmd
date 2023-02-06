@@ -1,5 +1,5 @@
 {
-  "name": "vspmd",
+  "name": "premid-pmd",
   "displayName": "pmd",
   "description": "Tool for creating and modifying Presences.",
   "version": "1.0.0",
@@ -21,11 +21,8 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onCommand:pmd.createPresence",
-    "onCommand:pmd.modifyPresence"
-  ],
   "main": "./dist/extension.js",
+  "activationEvents": [],
   "contributes": {
     "commands": [
       {

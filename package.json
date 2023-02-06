@@ -5,7 +5,7 @@
   "license": "MPL-2.0",
   "private": true,
   "scripts": {
-    "extension": "pnpm -F vspmd",
+    "extension": "pnpm -F premid-pmd",
     "extension:debug": "pnpm extension debug",
     "cli": "pnpm -F @pmd/cli"
   }

@@ -6,8 +6,8 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}/extension"],
-      "outFiles": ["${workspaceFolder}/extension/dist/**/*.js"],
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}/apps/extension"],
+      "outFiles": ["${workspaceFolder}/apps/extension/dist/**/*.js"],
       "preLaunchTask": "npm: extension:debug"
     }
   ]

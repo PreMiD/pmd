@@ -1,5 +1,8 @@
-import { readFile } from "fs/promises";
 import { commands, ExtensionContext, window, workspace, RelativePattern } from "vscode";
+
+import { readFile } from "node:fs/promises";
+import { exec } from "node:child_process";
+
 import createPresence from "./actions/create";
 import modifyPresence from "./actions/modify";
 
@@ -19,7 +22,27 @@ export function activate(context: ExtensionContext) {
 }
 
 export const workspaceFolder = workspace.workspaceFolders?.[0].uri.fsPath as string;
-export const presencesGlobPattern = new RelativePattern(workspaceFolder, "websites/*/*/metadata.json");
+export const presencesGlobPattern = new RelativePattern(workspaceFolder ?? "", "websites/*/*/metadata.json");
+
+export function installDependencies() {
+  const status = window.setStatusBarMessage("$(loading~spin) Installing dependencies...");
+
+  window.showInformationMessage("Installing dependencies...");
+
+  return new Promise<void>((resolve, reject) => {
+    exec("npm install", {
+      cwd: workspaceFolder
+    }, (err, stdout, stderr) => {
+      if (err) {
+        window.showErrorMessage("An error occurred while installing the dependencies");
+        reject(err);
+      } else window.showInformationMessage("Dependencies installed successfully!");
+
+      status.dispose();
+      resolve();
+    });
+  });
+}
 
 async function handleCommand(this: {
   name: string;
