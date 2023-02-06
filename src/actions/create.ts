@@ -96,14 +96,14 @@ const res = await inquirer.prompt<{
 
 			metadata.author = {
 				id: input,
-				name: serviceAuthor.username
+				name: serviceAuthor.username.replace(/#[0-9]{4}/g, '')
 			};
 
 			return true;
 		},
 		transformer: (input: string) => {
 			return serviceAuthor
-				? serviceAuthor.username
+				? serviceAuthor.username.replace(/#[0-9]{4}/g, '')
 				: input;
 		}
 	},
