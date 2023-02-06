@@ -9,5 +9,5 @@
       "@ext/*": ["../../apps/extension/types/*"]
     }
   },
-  "exclude": ["template"]
+  "exclude": ["template", "bin"]
 }
