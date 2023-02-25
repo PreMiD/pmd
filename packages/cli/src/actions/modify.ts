@@ -29,7 +29,7 @@ if (!service) process.exit(0);
 
 const require = createRequire(import.meta.url);
 const presencePath = resolve(
-	`./websites/${getFolderLetter(service)}/${service}`
+	`./websites/${getFolderLetter(service)}/${service.replace("!", " ")}`
 );
 
 await cp(
