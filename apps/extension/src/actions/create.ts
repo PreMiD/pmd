@@ -263,7 +263,7 @@ export default async function createPresence(context: ExtensionContext) {
     window.showInformationMessage(`Creating the Presence '${state.service}'`);
 
     const presencePath = resolve(
-      `${workspaceFolder}/websites/${getFolderLetter(state.service)}/${state.service
+      `${workspaceFolder}/websites/${getFolderLetter(state.service)}/${state.service.replace("!", " ")
       }`
     );
 
