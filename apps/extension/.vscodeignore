@@ -1,0 +1,10 @@
+.vscode/
+src/
+types/
+
+*.ts
+
+dist/*.ts
+dist/*.js.map
+
+tsconfig.json

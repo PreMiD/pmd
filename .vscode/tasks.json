@@ -1,0 +1,43 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "type": "npm",
+        "script": "extension:debug",
+        "problemMatcher": {
+          "owner": "tsup",
+          "source": "tsup",
+          "severity": "error",
+          "pattern": [
+            {
+              "regexp": "^✘\\s+\\[ERROR\\]\\s+(.+)$",
+              "message": 1
+            },
+            {
+              "regexp": "^\\s*$"
+            },
+            {
+              "regexp": "^\\s+(.+):(\\d+):(\\d+):$",
+              "file": 1,
+              "line": 2,
+              "column": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^CJS Build start$",
+            "endsPattern": "^CJS .* Build success|^CJS Build failed"
+          }
+        },
+        "isBackground": true,
+        "presentation": {
+          "reveal": "never"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      }
+    ]
+  }
+  
