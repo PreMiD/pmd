@@ -128,7 +128,7 @@ export default async function createPresence(context: ExtensionContext) {
       validate: async (input: string) => {
         if (!input) return "Website URL cannot be empty";
         const schemaRes = validator.validate(
-          input.includes(",") ? input.split(",") : input,
+          input.includes(",") ? input.split(",").map((url) => url.trim()) : input,
           schema.properties.url
         );
 
