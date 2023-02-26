@@ -115,7 +115,7 @@ const res = await inquirer.prompt<{
 
 			let urls: string[] | string;
 
-			if (input.split(",").length > 1) urls = input.split(",");
+			if (input.split(",").length > 1) urls = input.split(",").map((url) => url.trim());
 			else urls = input;
 
 			const schemaRes = v.validate(urls, schema.properties.url);
