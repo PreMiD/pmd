@@ -7,11 +7,11 @@ const presence = new Presence({
 		play: 'presence.playback.playing',
 		pause: 'presence.playback.paused',
 	}),
-	browsingTimestamp = Math.floor(Date.now() / 1000);
-// You use these for all non element images
-enum Assets {
-	Logo = '', // You should the imgur logo in here
-	Play = 'https://i.imgur.com/lytENvp.png',
+	browsingTimestamp = Math.floor(Date.now() / 1000); // Here you generate the time someone is spending on the page. You divivde the miliseconds to seconds (/ 1000)
+
+enum Assets { // An Enum for collecting all images (that aren't loaded on the site or are better quality for usage for the presence.
+	Logo = '', // You should the logo link in here (Atm imgur links.)
+	Play = 'https://i.imgur.com/lytENvp.png', // Other links are for smallImageKeys you can use the in presence.
 	Pause = 'https://i.imgur.com/NT77akx.png',
 	Stop = 'https://i.imgur.com/8p9PINr.png',
 	Search = 'https://i.imgur.com/ZVhazc7.png',
@@ -28,7 +28,7 @@ enum Assets {
 	Premiere = 'https://i.imgur.com/qiO6Yc0.png',
 	PremiereLive = 'https://i.imgur.com/W97FVF6.png',
 	Viewing = 'https://i.imgur.com/sNXN6K4.png',
-}
+} // At the end of creating a presence, please remove all unused Assets within the enum.
 
 /*
 function myOutsideHeavyLiftingFunction(){
@@ -52,7 +52,7 @@ presence.on('UpdateData', async () => {
 		//The large image on the presence. This can be a key of an image uploaded to imgur.
 		largeImageKey: Assets.Logo,
 		//The small image on the presence. This can be a key of an image uploaded to imgur that has been added to the enum Assets.
-		smallImageKey: 'https://mycrazywebsite.com/coolImage.png',
+		smallImageKey: '', // Put an Asset from Assets there e.g. Assets.Play 
 		//The text which is displayed when hovering over the small image
 		smallImageText: 'Some hover text',
 		//The upper section of the presence text
