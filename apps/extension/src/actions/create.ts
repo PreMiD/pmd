@@ -305,7 +305,7 @@ export default async function createPresence(context: ExtensionContext) {
 
     await writeFile(
       resolve(presencePath, "metadata.json"),
-      JSON.stringify(metadata, null, 2)
+      JSON.stringify(metadata, null, "\t")
     );
 
     window
