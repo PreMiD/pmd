@@ -26,7 +26,7 @@
 		"@types/glob": "^8.0.0",
 		"@types/got": "^9.6.12",
 		"@types/inquirer": "^9.0.1",
-		"@types/node": "^18.7.16",
+		"@types/node": "^20.0.0",
 		"@types/prompts": "^2.0.14",
 		"@types/semver": "^7.3.12",
 		"rimraf": "^3.0.2",
