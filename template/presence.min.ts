@@ -6,6 +6,7 @@ const presence = new Presence({
 		pause: "presence.playback.paused",
 	}),
 	browsingTimestamp = Math.floor(Date.now() / 1000);
+
 const enum Assets { // Other default assets can be found at index.d.ts
 	Logo = "",
 }
