@@ -19,7 +19,7 @@ importers:
       jsonschema: ^1.4.1
       ts-loader: ^9.4.1
       tsup: ^6.2.3
-      typescript: ^4.8.4
+      typescript: ^5.0.0
       webpack: ^5.74.0
     devDependencies:
       '@pmd/cli': link:../../packages/cli
@@ -32,9 +32,9 @@ importers:
       copy-webpack-plugin: 11.0.0_webpack@5.75.0
       discord-rpc: 4.0.1
       jsonschema: 1.4.1
-      ts-loader: 9.4.2_hhrrucqyg4eysmfpujvov2ym5u
-      tsup: 6.5.0_typescript@4.9.5
-      typescript: 4.9.5
+      ts-loader: 9.4.2_glzhjewjkiix2llte6b2jooyze
+      tsup: 6.5.0_typescript@5.0.4
+      typescript: 5.0.4
       webpack: 5.75.0
 
   packages/cli:
@@ -64,7 +64,7 @@ importers:
       semver: ^7.3.7
       source-map-support: ^0.5.21
       ts-loader: ^9.4.1
-      typescript: ^4.8.3
+      typescript: ^5.0.0
       webpack: ^5.74.0
     dependencies:
       '@apollo/client': 3.7.7_graphql@16.6.0
@@ -83,7 +83,7 @@ importers:
       prompts: 2.4.2
       semver: 7.3.8
       source-map-support: 0.5.21
-      ts-loader: 9.4.2_hhrrucqyg4eysmfpujvov2ym5u
+      ts-loader: 9.4.2_glzhjewjkiix2llte6b2jooyze
       webpack: 5.75.0
     devDependencies:
       '@types/discord-rpc': 4.0.3
@@ -94,7 +94,7 @@ importers:
       '@types/prompts': 2.4.2
       '@types/semver': 7.3.13
       rimraf: 3.0.2
-      typescript: 4.9.5
+      typescript: 5.0.4
 
 packages:
 
@@ -1899,7 +1899,7 @@ packages:
       tslib: 2.5.0
     dev: false
 
-  /ts-loader/9.4.2_hhrrucqyg4eysmfpujvov2ym5u:
+  /ts-loader/9.4.2_glzhjewjkiix2llte6b2jooyze:
     resolution: {integrity: sha512-OmlC4WVmFv5I0PpaxYb+qGeGOdm5giHU7HwDDUjw59emP2UYMHy9fFSDcYgSNoH8sXcj4hGCSEhlDZ9ULeDraA==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
@@ -1910,13 +1910,13 @@ packages:
       enhanced-resolve: 5.12.0
       micromatch: 4.0.5
       semver: 7.3.8
-      typescript: 4.9.5
+      typescript: 5.0.4
       webpack: 5.75.0
 
   /tslib/2.5.0:
     resolution: {integrity: sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==}
 
-  /tsup/6.5.0_typescript@4.9.5:
+  /tsup/6.5.0_typescript@5.0.4:
     resolution: {integrity: sha512-36u82r7rYqRHFkD15R20Cd4ercPkbYmuvRkz3Q1LCm5BsiFNUgpo36zbjVhCOgvjyxNBWNKHsaD5Rl8SykfzNA==}
     engines: {node: '>=14'}
     hasBin: true
@@ -1946,7 +1946,7 @@ packages:
       source-map: 0.8.0-beta.0
       sucrase: 3.29.0
       tree-kill: 1.2.2
-      typescript: 4.9.5
+      typescript: 5.0.4
     transitivePeerDependencies:
       - supports-color
       - ts-node
@@ -1957,9 +1957,9 @@ packages:
     engines: {node: '>=14.16'}
     dev: false
 
-  /typescript/4.9.5:
-    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
-    engines: {node: '>=4.2.0'}
+  /typescript/5.0.4:
+    resolution: {integrity: sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==}
+    engines: {node: '>=12.20'}
     hasBin: true
 
   /update-browserslist-db/1.0.10_browserslist@4.21.5:
