@@ -9,7 +9,7 @@ const presence = new Presence({
 	}),
 	browsingTimestamp = Math.floor(Date.now() / 1000); // Here you generate the time someone is spending on the page. You divivde the miliseconds to seconds (/ 1000)
 
-enum Assets { // An Enum for collecting all images (that aren't loaded on the site or are better quality for usage for the presence.
+const enum Assets { // An Enum for collecting all images (that aren't loaded on the site or are better quality for usage for the presence.
 	Logo = "", // You should the logo link in here (Atm imgur links.)
 }
 
