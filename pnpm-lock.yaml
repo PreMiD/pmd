@@ -12,7 +12,7 @@ importers:
       '@types/node': ^18.11.2
       '@types/vscode': ^1.32.0
       axios: ^1.1.2
-      chalk: 4.0.0
+      chalk: 4.1.2
       chokidar: ^3.5.3
       copy-webpack-plugin: ^11.0.0
       discord-rpc: ^4.0.1
@@ -27,7 +27,7 @@ importers:
       '@types/node': 18.11.19
       '@types/vscode': 1.75.0
       axios: 1.3.2
-      chalk: 4.0.0
+      chalk: 4.1.2
       chokidar: 3.5.3
       copy-webpack-plugin: 11.0.0_webpack@5.75.0
       discord-rpc: 4.0.1
@@ -581,14 +581,6 @@ packages:
 
   /caniuse-lite/1.0.30001450:
     resolution: {integrity: sha512-qMBmvmQmFXaSxexkjjfMvD5rnDL0+m+dUMZKoDYsGG8iZN29RuYh9eRoMvKsT6uMAWlyUUGDEQGJJYjzCIO9ew==}
-
-  /chalk/4.0.0:
-    resolution: {integrity: sha512-N9oWFcegS0sFr9oh1oz2d7Npos6vNoWW9HvtCg5N1KRFpUhaAhvTv5Y58g880fZaEYSNm3qDz8SU1UrGvp+n7A==}
-    engines: {node: '>=10'}
-    dependencies:
-      ansi-styles: 4.3.0
-      supports-color: 7.2.0
-    dev: true
 
   /chalk/4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
