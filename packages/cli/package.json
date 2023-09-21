@@ -41,7 +41,7 @@
 		"discord-rpc": "^4.0.1",
 		"displayastree": "^2.0.0",
 		"globby": "^13.1.2",
-		"graphql": "^16.6.0",
+		"graphql": "^16.8.1",
 		"inquirer": "^9.1.1",
 		"jsonschema": "^1.4.1",
 		"language-flag-colors": "^2.1.1",
