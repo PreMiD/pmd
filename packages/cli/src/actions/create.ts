@@ -29,7 +29,7 @@ let serviceAuthor: Awaited<ReturnType<typeof getDiscordUser>>;
 
 const metadata = JSON.parse(
 	await readFile(
-		resolve(fileURLToPath(import.meta.url), "../../../template/metadata.json"),
+		 resolve(fileURLToPath(import.meta.url), "../../../template/metadata.json"),
 		"utf8"
 	)
 );
