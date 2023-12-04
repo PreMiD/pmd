@@ -26,23 +26,23 @@ if (user) console.log(prefix, `Hello ${chalk.green(user.username)}!`);
 
 const program = new Command();
 program
+  .allowUnknownOption()
   .option("-c, --create", "create a new Presence")
   .option("-m, --modify", "modify an existing presence")
   .option("-t, --translate", "translate a presence")
-  .parse(process.argv)
-  .allowUnknownOption();
+  .parse(process.argv);
 
 const method = Object.keys(program.opts()).find(
   (key) => program.opts()[key] === true
 );
 
 if (method) {
-	if (method === "create")
-	  console.log(
-		chalk.green("?"),
-		chalk.bold("What do you want to do?"),
-		chalk.cyan("Create a new Presence")
-	  );
+  if (method === "create")
+    console.log(
+      chalk.green("?"),
+      chalk.bold("What do you want to do?"),
+      chalk.cyan("Create a new Presence")
+    );
   await import(`./actions/${method}.js`);
 } else {
   const { action } = await inquirer.prompt<{ action: string }>([

@@ -14,7 +14,10 @@ import Compiler from "../util/PresenceCompiler.js";
 import { prefix } from "../util/prefix.js";
 
 const program = new Command();
-program.option("-m, --modify [presence]").parse(process.argv);
+program
+  .allowUnknownOption()
+  .option("-m, --modify [presence]")
+  .parse(process.argv);
 
 let service = program.getOptionValue("modify");
 
