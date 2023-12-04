@@ -16,7 +16,8 @@ import { prefix } from "../util/prefix.js";
 const program = new Command();
 program.option("-m, --modify [presence]").parse(process.argv);
 
-let service = program.modify;
+let service = program.getOptionValue("modify");
+
 if (typeof service !== "string") {
   service = (
     await prompts({
@@ -34,13 +35,14 @@ if (typeof service !== "string") {
   ).service;
   if (!service) process.exit(0);
 } else {
-  const e = (await getPresences())
-    .map((s) => ({
-      title: s.service,
-    }))
-    .find((p) => p.title.toLowerCase() === program.modify.toLowerCase());
-
-  if (!e) {
+  //check if the requested presence (-m [presence]) exists
+  if (
+    !(await getPresences())
+      .map((s) => ({
+        title: s.service,
+      }))
+      .find((p) => p.title.toLowerCase() === service.toLowerCase())
+  ) {
     console.log(prefix, chalk.redBright("Could not find presence:", service));
     process.exit(0);
   }
