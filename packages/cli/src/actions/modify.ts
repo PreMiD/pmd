@@ -12,6 +12,7 @@ import getPresences from "../functions/getPresences.js";
 
 import Compiler from "../util/PresenceCompiler.js";
 import { prefix } from "../util/prefix.js";
+import { existsSync } from "node:fs";
 
 const program = new Command();
 program
@@ -56,10 +57,11 @@ const presencePath = resolve(
   `./websites/${getFolderLetter(service)}/${service.replace("!", " ")}`
 );
 
-await cp(
-  resolve(fileURLToPath(import.meta.url), "../../../template/tsconfig.json"),
-  resolve(presencePath, "tsconfig.json")
-);
+if (!existsSync(resolve(presencePath, "tsconfig.json")))
+  await cp(
+    resolve(fileURLToPath(import.meta.url), "../../../template/tsconfig.json"),
+    resolve(presencePath, "tsconfig.json")
+  );
 
 console.log(prefix, chalk.greenBright("Starting TypeScript compiler..."));
 const compiler = new Compiler(presencePath);
