@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { createRequire } from "node:module";
 import { cp } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { existsSync } from "node:fs";
 
 import { Command } from "commander";
 import prompts from "prompts";
@@ -12,7 +13,6 @@ import getPresences from "../functions/getPresences.js";
 
 import Compiler from "../util/PresenceCompiler.js";
 import { prefix } from "../util/prefix.js";
-import { existsSync } from "node:fs";
 
 const program = new Command();
 program
