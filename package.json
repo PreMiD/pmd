@@ -1,14 +1,15 @@
 {
 	"name": "pmd",
 	"description": "CLI for creating, modifying & translating Presences.",
-	"version": "1.1.3",
+	"version": "1.2.0",
 	"author": "Timeraa <me@timeraa.dev>",
 	"main": "src/index.ts",
 	"license": "MPL-2.0",
 	"type": "module",
 	"contributors": [
 		"Bas950 <me@bas950.com>",
-		"EncryptedDev"
+		"EncryptedDev",
+		"veryCrunchy <verycrunchydev@gmail.com>"
 	],
 	"scripts": {
 		"dev": "tsc -w",
