@@ -1,20 +1,16 @@
 import { exec } from "child_process";
 import { resolve } from "path";
 import { existsSync } from "fs";
-import ora, { Ora } from "ora";
+import ora from "ora";
 import { prefix } from "./prefix.js";
 import chalk from "chalk";
 import { readFile } from "fs/promises";
 
-import { OutputTerminal } from "@ext/index";
 export default class ModuleManager {
 	dependencies: string[] = [];
 	devDependencies: string[] = [];
-	outputTerminal: OutputTerminal | undefined;
 
-	constructor(public cwd: string, outputTerminal?: OutputTerminal) {
-		this.outputTerminal = outputTerminal;
-	}
+	constructor(public cwd: string) {}
 
 	async isValidPackageJson() {
 		if (!existsSync(resolve(this.cwd, "package.json"))) return false;
@@ -33,12 +29,9 @@ export default class ModuleManager {
 
 		if (!(await this.isValidPackageJson())) return;
 
-		let spinner: Ora;
-		if (!this.outputTerminal) {
-			spinner = ora(
-				prefix + chalk.yellow(" Installing dependencies...")
-			).start();
-		} else this.outputTerminal.appendLine(chalk.yellow("Installing dependencies..."));
+		const spinner = ora(
+			prefix + chalk.yellow(" Installing dependencies...")
+		).start();
 
 		//* Run npm install
 		const job = exec("npm install --loglevel error --save-exact", {
@@ -53,13 +46,13 @@ export default class ModuleManager {
 		await new Promise<void>(r =>
 			job.once("exit", code => {
 				if (code === 0) {
-					if (spinner) spinner.succeed(prefix + chalk.green(" Installed dependencies!"));
-					else this.outputTerminal!.appendLine(chalk.green("Installed dependencies!"));
+					spinner.succeed(prefix + chalk.green(" Installed dependencies!"));
+
 					return r();
 				}
 
-				if (spinner) spinner.fail(prefix + " " + chalk.red(errorChunks.join("")));
-				else this.outputTerminal!.appendLine(chalk.red(errorChunks.join("")));
+				spinner.fail(prefix + " " + chalk.red(errorChunks.join("")));
+
 				r();
 			})
 		);
