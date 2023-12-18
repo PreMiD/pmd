@@ -29,7 +29,7 @@ let serviceAuthor: Awaited<ReturnType<typeof getDiscordUser>>;
 
 const metadata = JSON.parse(
 	await readFile(
-		 resolve(fileURLToPath(import.meta.url), "../../../template/metadata.json"),
+		resolve(fileURLToPath(import.meta.url), "../../../template/metadata.json"),
 		"utf8"
 	)
 );
@@ -115,7 +115,7 @@ const res = await inquirer.prompt<{
 
 			let urls: string[] | string;
 
-			if (input.split(",").length > 1) urls = input.split(",").map((url) => url.trim());
+			if (input.split(",").length > 1) urls = input.split(",");
 			else urls = input;
 
 			const schemaRes = v.validate(urls, schema.properties.url);
@@ -181,7 +181,7 @@ const res = await inquirer.prompt<{
 ]);
 
 const presencePath = resolve(
-	`./websites/${getFolderLetter(res.service)}/${res.service.replace("!", " ")}`
+	`./websites/${getFolderLetter(res.service)}/${res.service}`
 );
 
 await mkdir(resolve(presencePath, "dist"), {
@@ -202,10 +202,6 @@ metadata.tags = res.tags.split(",");
 metadata.category = res.category;
 metadata.version = "1.0.0";
 
-const presenceFileToCopy = (await isFirstTimeAuthor(res.author))
-	? "presence.ts"
-	: "presence.min.ts";
-
 await writeFile(
 	resolve(presencePath, "metadata.json"),
 	JSON.stringify(metadata, null, "\t")
@@ -216,6 +212,9 @@ await cp(
 	resolve(presencePath, "tsconfig.json")
 );
 
+const presenceFileToCopy = (await isFirstTimeAuthor(res.author))
+	? "presence.ts"
+	: "presence.min.ts";
 await cp(
 	resolve(
 		fileURLToPath(import.meta.url),
@@ -228,7 +227,7 @@ console.log(prefix, chalk.green("Presence created! You can now start coding!"));
 
 async function serviceExists(service: string) {
 	try {
-		await access(`./websites/${getFolderLetter(service)}/${service}`);
+		await access(`./websites/${service.at(0)!.toUpperCase()}/${service}`);
 		return true;
 	} catch {
 		return false;

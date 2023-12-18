@@ -4,9 +4,8 @@ import "source-map-support/register.js";
 import chalk from "chalk";
 import { readFile } from "fs/promises";
 import inquirer from "inquirer";
-import { Command } from "commander";
 import ora from "ora";
-
+import { Command } from "commander";
 import getDiscordAppUser from "./functions/getDiscordAppUser.js";
 import { prefix } from "./util/prefix.js";
 
@@ -17,12 +16,6 @@ if (!(await inPresenceRepo())) {
   );
   process.exit(1);
 }
-
-const spinner = ora("Fetching Discord User...").start(),
-  user = await getDiscordAppUser();
-spinner.stop();
-
-if (user) console.log(prefix, `Hello ${chalk.green(user.username)}!`);
 
 const program = new Command();
 program
@@ -45,6 +38,11 @@ if (method) {
     );
   await import(`./actions/${method}.js`);
 } else {
+  const spinner = ora("Fetching Discord User...").start(),
+    user = await getDiscordAppUser();
+  spinner.stop();
+
+  if (user) console.log(prefix, `Hello ${chalk.green(user.username)}!`);
   const { action } = await inquirer.prompt<{ action: string }>([
     {
       type: "list",
