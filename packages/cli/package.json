@@ -1,5 +1,5 @@
 {
-	"name": "pmd",
+	"name": "@pmd/cli",
 	"description": "CLI for creating, modifying & translating Presences.",
 	"version": "1.2.0",
 	"author": "Timeraa <me@timeraa.dev>",

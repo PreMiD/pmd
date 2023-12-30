@@ -128,7 +128,9 @@ export default async function createPresence(context: ExtensionContext) {
       validate: async (input: string) => {
         if (!input) return "Website URL cannot be empty";
         const schemaRes = validator.validate(
-          input.includes(",") ? input.split(",").map((url) => url.trim()) : input,
+          input.includes(",")
+            ? input.split(",").map((url) => url.trim())
+            : input,
           schema.properties.url
         );
 
@@ -263,8 +265,9 @@ export default async function createPresence(context: ExtensionContext) {
     window.showInformationMessage(`Creating the Presence '${state.service}'`);
 
     const presencePath = resolve(
-      `${workspaceFolder}/websites/${getFolderLetter(state.service)}/${state.service.replace("!", " ")
-      }`
+      `${workspaceFolder}/websites/${getFolderLetter(
+        state.service
+      )}/${state.service.replace("!", "").trim()}`
     );
 
     await mkdir(resolve(presencePath, "dist"), {
@@ -330,9 +333,14 @@ export default async function createPresence(context: ExtensionContext) {
       });
 
     if (!existsSync(resolve(workspaceFolder, "node_modules"))) {
-      window.showInformationMessage("You don't have the dependencies installed, do you want to install them now?", "Yes").then(async (choice) => {
-        if (choice === "Yes") installDependencies();
-      });
+      window
+        .showInformationMessage(
+          "You don't have the dependencies installed, do you want to install them now?",
+          "Yes"
+        )
+        .then(async (choice: string) => {
+          if (choice === "Yes") installDependencies();
+        });
     }
   }
 }
@@ -348,7 +356,11 @@ async function fetchDiscordAppUser() {
       `$(check) Found ${user.username}#${user.discriminator}`,
       1000
     );
-  else window.setStatusBarMessage("$(error) Couldn't find your Discord user via IPC", 1000);
+  else
+    window.setStatusBarMessage(
+      "$(error) Couldn't find your Discord user via IPC",
+      1000
+    );
 
   return user;
 }

@@ -23,7 +23,7 @@ program
   .option("-m, --modify [presence]")
   .parse(process.argv);
 
-let service = program.getOptionValue("modify");
+let service = program.getOptionValue("modify").trim();
 
 if (typeof service !== "string") {
   service = (
@@ -39,7 +39,7 @@ if (typeof service !== "string") {
         value: s.service,
       })),
     })
-  ).service;
+  ).service.trim();
   if (!service) process.exit(0);
 } else {
   //check if the requested presence (-m [presence]) exists
@@ -48,7 +48,9 @@ if (typeof service !== "string") {
       .map((s) => ({
         title: s.service,
       }))
-      .find((p) => p.title.toLowerCase() === service.toLowerCase())
+      .find(
+        (p) => p.title.toLowerCase() === service.replace("!", "").toLowerCase()
+      )
   ) {
     console.log(prefix, chalk.redBright("Could not find presence:", service));
     process.exit(0);
@@ -57,7 +59,7 @@ if (typeof service !== "string") {
 
 const require = createRequire(import.meta.url);
 const presencePath = resolve(
-  `./websites/${getFolderLetter(service)}/${service}`
+  `./websites/${getFolderLetter(service)}/${service.replace("!", "")}`
 );
 
 const moduleManager = new ModuleManager(presencePath);
