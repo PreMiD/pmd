@@ -147,7 +147,7 @@ export default async function createPresence(context: ExtensionContext) {
       step: 5,
       totalSteps: 7,
       value: state.logo || "",
-      prompt: "Imgur URL of the logo",
+      prompt: "Image URL of the logo",
       placeHolder: "https://i.imgur.com/xXxXxXx.png",
       validate: async (input: string) => {
         if (!input) return "Logo URL cannot be empty";
@@ -166,7 +166,7 @@ export default async function createPresence(context: ExtensionContext) {
       step: 6,
       totalSteps: 7,
       value: state.thumbnail || "",
-      prompt: "Imgur URL of the thumbnail",
+      prompt: "Image URL of the thumbnail",
       placeHolder: "https://i.imgur.com/xXxXxXx.png",
       validate: async (input: string) => {
         if (!input) return "Thumbnail URL cannot be empty";

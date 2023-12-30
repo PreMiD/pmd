@@ -124,7 +124,7 @@ const res = await inquirer.prompt<{
   },
   {
     name: "logo",
-    message: "Imgur URL of the logo",
+    message: "Image URL of the logo",
     validate: (input: string) => {
       if (!input) return "Logo cannot be empty!";
 
@@ -136,7 +136,7 @@ const res = await inquirer.prompt<{
   },
   {
     name: "thumbnail",
-    message: "Imgur URL of the thumbnail",
+    message: "Image URL of the thumbnail",
     validate: (input: string) => {
       if (!input) return "Thumbnail cannot be empty!";
 
