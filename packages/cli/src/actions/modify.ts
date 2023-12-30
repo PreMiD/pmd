@@ -49,7 +49,7 @@ if (typeof service !== "string") {
         title: s.service,
       }))
       .find(
-        (p) => p.title.toLowerCase() === service.replace("!", "").toLowerCase()
+        (p) => p.title.toLowerCase() === service.replace("!", " ").trim().toLowerCase()
       )
   ) {
     console.log(prefix, chalk.redBright("Could not find presence:", service));
@@ -59,7 +59,7 @@ if (typeof service !== "string") {
 
 const require = createRequire(import.meta.url);
 const presencePath = resolve(
-  `./websites/${getFolderLetter(service)}/${service.replace("!", "")}`
+  `./websites/${getFolderLetter(service)}/${service.replace("!", " ").trim()}`
 );
 
 const moduleManager = new ModuleManager(presencePath);

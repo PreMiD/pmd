@@ -267,7 +267,7 @@ export default async function createPresence(context: ExtensionContext) {
     const presencePath = resolve(
       `${workspaceFolder}/websites/${getFolderLetter(
         state.service
-      )}/${state.service.replace("!", "").trim()}`
+      )}/${state.service.replace("!", " ").trim()}`
     );
 
     await mkdir(resolve(presencePath, "dist"), {

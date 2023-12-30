@@ -75,7 +75,7 @@ export default async function modifyPresence(context: ExtensionContext, retry = 
   runningInstances[instanceId] = service;
 
   const presencePath = resolve(
-    `${workspaceFolder}/websites/${getFolderLetter(service)}/${service.replace("!", "").trim()}`
+    `${workspaceFolder}/websites/${getFolderLetter(service)}/${service.replace("!", " ").trim()}`
   );
 
   const terminal = new OutputTerminal(service);
