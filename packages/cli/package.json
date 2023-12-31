@@ -1,14 +1,15 @@
 {
 	"name": "@pmd/cli",
 	"description": "CLI for creating, modifying & translating Presences.",
-	"version": "1.0.0",
+	"version": "1.2.0",
 	"author": "Timeraa <me@timeraa.dev>",
-	"main": "bin/api.js",
+	"main": "src/index.ts",
 	"license": "MPL-2.0",
 	"type": "module",
 	"contributors": [
 		"Bas950 <me@bas950.com>",
-		"EncryptedDev"
+		"EncryptedDev",
+		"veryCrunchy <verycrunchydev@gmail.com>"
 	],
 	"scripts": {
 		"dev": "tsc -w",
@@ -36,6 +37,7 @@
 		"@apollo/client": "^3.6.9",
 		"chalk": "^5.0.1",
 		"chokidar": "^3.5.3",
+		"commander": "^11.1.0",
 		"copy-webpack-plugin": "^11.0.0",
 		"cross-fetch": "^3.1.5",
 		"discord-rpc": "^4.0.1",

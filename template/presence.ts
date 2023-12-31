@@ -10,7 +10,7 @@ const presence = new Presence({
 	browsingTimestamp = Math.floor(Date.now() / 1000); // Here you generate the time someone is spending on the page. You divivde the miliseconds to seconds (/ 1000)
 
 const enum Assets { // An Enum for collecting all images (that aren't loaded on the site or are better quality for usage for the presence.
-	Logo = "", // You should the logo link in here (Atm imgur links.)
+	Logo = "", // You should the logo link in here
 }
 
 /*
@@ -32,10 +32,10 @@ presence.on("UpdateData", async () => {
     It is recommended to set up another function outside of this event function which will change variable values and do the heavy lifting if you call data from an API.*/
 
 	const presenceData: PresenceData = {
-		//The large image on the presence. This can be a key of an image uploaded to imgur.
-		largeImageKey: Assets.Logo,
-		//The small image on the presence. This can be a key of an image uploaded to imgur that has been added to the enum Assets.
-		smallImageKey: "", // Put an Asset from Assets there e.g. Assets.Play. All Assets can be found at index.d.ts
+		//The large image on the presence. This can be a key of an image that has been added to the enum Assets.
+		largeImageKey: Assets.Logo, // Assets enum key or image url
+		//The small image on the presence. This can be a key of an image that has been added to the enum Assets.
+		smallImageKey: "", // Assets enum key or image url.
 		//The text which is displayed when hovering over the small image
 		smallImageText: "Some hover text",
 		//The upper section of the presence text
