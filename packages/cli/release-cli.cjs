@@ -106,7 +106,7 @@ async function release(match) {
       },
     })
     .catch(async (e) => {
-      console.log(e.response.data.errors);
+      console.log(e.response.data.errors || e.response.data.message);
       if (
         (
           await prompts({
