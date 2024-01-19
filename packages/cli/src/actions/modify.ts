@@ -23,7 +23,7 @@ program
   .option("-m, --modify [presence]")
   .parse(process.argv);
 
-let service = program.getOptionValue("modify").trim();
+let service = program.getOptionValue("modify")?.trim();
 
 if (typeof service !== "string") {
   service = (
@@ -39,7 +39,7 @@ if (typeof service !== "string") {
         value: s.service,
       })),
     })
-  ).service.trim();
+  ).service?.trim();
   if (!service) process.exit(0);
 } else {
   //check if the requested presence (-m [presence]) exists
