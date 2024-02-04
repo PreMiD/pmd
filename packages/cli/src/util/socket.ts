@@ -7,16 +7,16 @@ class WebSocketManager {
   private ws: WebSocketServer | null = null;
 
   private constructor() {
-    this.ws = new WebSocketServer({ port: 3613 });
+    this.ws = new WebSocketServer({ port: 3021 });
 
     this.ws.on("connection", (ws) => {
-      console.log(prefix, chalk.greenBright("connected to extension"));
+      console.log(prefix, chalk.greenBright("Connected to extension"));
       ws.on("error", console.error);
       ws.on("message", (m) => {
         if (m.toString() === "disconnecting")
-          console.log(prefix, chalk.redBright("extension disconnected"));
+          console.log(prefix, chalk.redBright("Extension disconnected"));
         if (m.toString() === "received")
-          console.log(prefix, chalk.greenBright.dim("presence updated in extension"));
+          console.log(prefix, chalk.greenBright.dim("Presence updated in extension"));
       });
     });
   }
