@@ -7,7 +7,7 @@ class WebSocketManager {
   private ws: WebSocketServer | null = null;
 
   private constructor() {
-    this.ws = new WebSocketServer({ port: 3613 });
+    this.ws = new WebSocketServer({ port: 3021 });
 
     this.ws.on("connection", (ws) => {
       console.log(prefix, chalk.greenBright("connected to extension"));
