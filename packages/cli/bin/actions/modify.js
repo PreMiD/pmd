@@ -20,7 +20,7 @@ program
     .allowUnknownOption()
     .option("-m, --modify [presence]")
     .parse(process.argv);
-let service = program.getOptionValue("modify").trim();
+let service = program.getOptionValue("modify")?.trim();
 if (typeof service !== "string") {
     service = (await prompts({
         name: "service",
@@ -31,7 +31,7 @@ if (typeof service !== "string") {
             description: "v" + s.version,
             value: s.service,
         })),
-    })).service.trim();
+    })).service?.trim();
     if (!service)
         process.exit(0);
 }
