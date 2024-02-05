@@ -204,12 +204,11 @@ class Compiler {
       if (compilation.errors.length === 0) {
         console.log(prefix, chalk.greenBright("Successfully compiled!"));
         const path = presencePath + "/dist";
-        let files = readdirSync(path);
         socket?.send(
           JSON.stringify({
             type: "localPresence",
             files: await Promise.all(
-              files.map((f) => {
+              readdirSync(path).map((f) => {
                 if (extname(f) === ".json")
                   return {
                     file: f,

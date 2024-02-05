@@ -16,7 +16,10 @@ class WebSocketManager {
         if (m.toString() === "disconnecting")
           console.log(prefix, chalk.redBright("Extension disconnected"));
         if (m.toString() === "received")
-          console.log(prefix, chalk.greenBright.dim("Presence updated in extension"));
+          console.log(
+            prefix,
+            chalk.greenBright.dim("Presence updated in extension")
+          );
       });
     });
   }
