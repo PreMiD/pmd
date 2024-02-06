@@ -1,7 +1,7 @@
 import chalk, { ChalkInstance } from "chalk";
-import { existsSync } from "fs";
+import { existsSync, readFileSync, readdirSync } from "fs";
 import { cp, rm } from "fs/promises";
-import { basename, dirname, resolve } from "path";
+import { basename, dirname, resolve, extname } from "path";
 import { Command } from "commander";
 import prompts from "prompts";
 import ts from "typescript";
@@ -9,7 +9,7 @@ import { fileURLToPath } from "url";
 import webpack from "webpack";
 import CopyPlugin from "copy-webpack-plugin";
 import { createRequire } from "module";
-
+import socket from "../util/socket.js";
 import getFolderLetter from "../functions/getFolderLetter.js";
 import getPresences from "../functions/getPresences.js";
 import { prefix } from "../util/prefix.js";
@@ -49,7 +49,9 @@ if (typeof service !== "string") {
         title: s.service,
       }))
       .find(
-        (p) => p.title.toLowerCase() === service.replace("!", " ").trim().toLowerCase()
+        (p) =>
+          p.title.toLowerCase() ===
+          service.replace("!", " ").trim().toLowerCase()
       )
   ) {
     console.log(prefix, chalk.redBright("Could not find presence:", service));
@@ -182,7 +184,7 @@ class Compiler {
       this.firstRun = false;
     });
 
-    this.compiler.hooks.afterCompile.tap("pmd", (compilation) => {
+    this.compiler.hooks.afterCompile.tap("pmd", async (compilation) => {
       compilation.errors = compilation.errors.filter(
         (e) => e.name !== "ModuleBuildError"
       );
@@ -199,9 +201,33 @@ class Compiler {
         console.error(error.message);
       }
 
-      if (compilation.errors.length === 0)
-        return console.log(prefix, chalk.greenBright("Successfully compiled!"));
-      else
+      if (compilation.errors.length === 0) {
+        console.log(prefix, chalk.greenBright("Successfully compiled!"));
+        const path = presencePath + "/dist";
+        socket?.send(
+          JSON.stringify({
+            type: "localPresence",
+            files: await Promise.all(
+              readdirSync(path).map((f) => {
+                if (extname(f) === ".json")
+                  return {
+                    file: f,
+                    contents: JSON.parse(
+                      readFileSync(`${path}/${f}`).toString()
+                    ),
+                  };
+                else if (extname(f) === ".js")
+                  return {
+                    file: f,
+                    contents: readFileSync(`${path}/${f}`).toString(),
+                  };
+                else return;
+              })
+            ),
+          })
+        );
+        return;
+      } else
         return console.log(
           prefix,
           chalk.redBright(
