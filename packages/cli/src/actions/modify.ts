@@ -1,7 +1,9 @@
 import chalk, { ChalkInstance } from "chalk";
+
 import { PathLike, existsSync, readFileSync, readdirSync } from "fs";
 import { cp, rm } from "fs/promises";
 import { basename, dirname, extname, resolve } from "path";
+
 import { Command } from "commander";
 import prompts from "prompts";
 import ts from "typescript";
@@ -9,7 +11,7 @@ import { fileURLToPath } from "url";
 import webpack from "webpack";
 import CopyPlugin from "copy-webpack-plugin";
 import { createRequire } from "module";
-
+import socket from "../util/socket.js";
 import getFolderLetter from "../functions/getFolderLetter.js";
 import getPresences from "../functions/getPresences.js";
 import { prefix } from "../util/prefix.js";
@@ -24,7 +26,9 @@ program
   .option("-m, --modify [presence]")
   .parse(process.argv);
 
+
 let service = program.getOptionValue("modify");
+
 
 if (typeof service !== "string") {
   service = (
@@ -41,6 +45,7 @@ if (typeof service !== "string") {
       })),
     })
   ).service;
+
   if (!service) process.exit(0);
   service = service.trim()
 } else {
@@ -52,7 +57,9 @@ if (typeof service !== "string") {
         title: s.service,
       }))
       .find(
-        (p) => p.title.toLowerCase() === service.replace("!", " ").trim().toLowerCase()
+        (p) =>
+          p.title.toLowerCase() ===
+          service.replace("!", " ").trim().toLowerCase()
       )
   ) {
     console.log(prefix, chalk.redBright("Could not find presence:", service));
@@ -185,7 +192,7 @@ class Compiler {
       this.firstRun = false;
     });
 
-    this.compiler.hooks.afterCompile.tap("pmd", (compilation) => {
+    this.compiler.hooks.afterCompile.tap("pmd", async (compilation) => {
       compilation.errors = compilation.errors.filter(
         (e) => e.name !== "ModuleBuildError"
       );
@@ -205,6 +212,7 @@ class Compiler {
       if (compilation.errors.length === 0) {
         console.log(prefix, chalk.greenBright("Successfully compiled!"));
         const path = presencePath + "/dist";
+
         sendPresenceToExtension(path);
 
         return;
