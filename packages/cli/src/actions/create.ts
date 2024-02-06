@@ -179,7 +179,9 @@ const res = await inquirer.prompt<{
 ]);
 
 const presencePath = resolve(
-  `./websites/${getFolderLetter(res.service)}/${res.service.replace("!", " ").trim()}`
+  `./websites/${getFolderLetter(res.service)}/${res.service
+    .replace("!", " ")
+    .trim()}`
 );
 
 await mkdir(resolve(presencePath, "dist"), {

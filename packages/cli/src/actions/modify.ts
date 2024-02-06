@@ -18,7 +18,6 @@ import { prefix } from "../util/prefix.js";
 import { ErrorInfo } from "ts-loader/dist/interfaces.js";
 import ModuleManager from "../util/ModuleManager.js";
 import { watch } from "chokidar";
-import socket from "../util/socket.js";
 
 const program = new Command();
 program
@@ -26,9 +25,7 @@ program
   .option("-m, --modify [presence]")
   .parse(process.argv);
 
-
 let service = program.getOptionValue("modify");
-
 
 if (typeof service !== "string") {
   service = (
@@ -47,7 +44,7 @@ if (typeof service !== "string") {
   ).service;
 
   if (!service) process.exit(0);
-  service = service.trim()
+  service = service.trim();
 } else {
   //check if the requested presence (-m [presence]) exists
   service = service.trim();
