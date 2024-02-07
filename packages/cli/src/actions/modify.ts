@@ -1,7 +1,9 @@
 import chalk, { ChalkInstance } from "chalk";
-import { existsSync, readFileSync, readdirSync } from "fs";
+
+import { PathLike, existsSync, readFileSync, readdirSync } from "fs";
 import { cp, rm } from "fs/promises";
-import { basename, dirname, resolve, extname } from "path";
+import { basename, dirname, extname, resolve } from "path";
+
 import { Command } from "commander";
 import prompts from "prompts";
 import ts from "typescript";
@@ -23,7 +25,7 @@ program
   .option("-m, --modify [presence]")
   .parse(process.argv);
 
-let service = program.getOptionValue("modify")?.trim();
+let service = program.getOptionValue("modify");
 
 if (typeof service !== "string") {
   service = (
@@ -39,10 +41,13 @@ if (typeof service !== "string") {
         value: s.service,
       })),
     })
-  ).service?.trim();
+  ).service;
+
   if (!service) process.exit(0);
+  service = service.trim();
 } else {
   //check if the requested presence (-m [presence]) exists
+  service = service.trim();
   if (
     !(await getPresences())
       .map((s) => ({
@@ -204,28 +209,9 @@ class Compiler {
       if (compilation.errors.length === 0) {
         console.log(prefix, chalk.greenBright("Successfully compiled!"));
         const path = presencePath + "/dist";
-        socket?.send(
-          JSON.stringify({
-            type: "localPresence",
-            files: await Promise.all(
-              readdirSync(path).map((f) => {
-                if (extname(f) === ".json")
-                  return {
-                    file: f,
-                    contents: JSON.parse(
-                      readFileSync(`${path}/${f}`).toString()
-                    ),
-                  };
-                else if (extname(f) === ".js")
-                  return {
-                    file: f,
-                    contents: readFileSync(`${path}/${f}`).toString(),
-                  };
-                else return;
-              })
-            ),
-          })
-        );
+
+        sendPresenceToExtension(path);
+
         return;
       } else
         return console.log(
@@ -284,3 +270,35 @@ watch(presencePath, { depth: 0, persistent: true, ignoreInitial: true }).on(
 );
 
 compiler.watch();
+let waiting = false;
+async function sendPresenceToExtension(path: PathLike) {
+  if (!existsSync(path) || !socket.isConnected()) {
+    if (waiting) return;
+    waiting = true;
+    setTimeout(() => {
+      waiting = false;
+      sendPresenceToExtension(path);
+    }, 1000);
+    return;
+  }
+  socket?.send(
+    JSON.stringify({
+      type: "localPresence",
+      files: await Promise.all(
+        readdirSync(path).map((f) => {
+          if (extname(f) === ".json")
+            return {
+              file: f,
+              contents: JSON.parse(readFileSync(`${path}/${f}`).toString()),
+            };
+          else if (extname(f) === ".js")
+            return {
+              file: f,
+              contents: readFileSync(`${path}/${f}`).toString(),
+            };
+          else return;
+        })
+      ),
+    })
+  );
+}

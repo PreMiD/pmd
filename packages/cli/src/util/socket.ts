@@ -31,6 +31,10 @@ class WebSocketManager {
     return WebSocketManager.instance;
   }
 
+  public isConnected() {
+    return !!this.ws?.clients.size;
+  }
+
   public send(message: string): void {
     this.ws?.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
