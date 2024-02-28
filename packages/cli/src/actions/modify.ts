@@ -207,12 +207,7 @@ class Compiler {
       }
 
       if (compilation.errors.length === 0) {
-        console.log(prefix, chalk.greenBright("Successfully compiled!"));
-        const path = presencePath + "/dist";
-
-        sendPresenceToExtension(path);
-
-        return;
+        return console.log(prefix, chalk.greenBright("Successfully compiled!"));
       } else
         return console.log(
           prefix,
@@ -270,6 +265,15 @@ watch(presencePath, { depth: 0, persistent: true, ignoreInitial: true }).on(
 );
 
 compiler.watch();
+
+const path = presencePath + "/dist";
+let timeout: NodeJS.Timeout;
+watch(path).on("all", () => {
+  clearTimeout(timeout);
+  timeout = setTimeout(() => {
+    sendPresenceToExtension(path);
+  }, 100);
+});
 let waiting = false;
 async function sendPresenceToExtension(path: PathLike) {
   if (!existsSync(path) || !socket.isConnected()) {
