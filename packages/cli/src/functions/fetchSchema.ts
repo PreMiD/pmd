@@ -22,6 +22,7 @@ export async function getLatestSchema(): Promise<string> {
   });
   return schemas[0];
 }
+
 export default async function fetchSchema() {
   const latestSchema = await getLatestSchema();
   return (
