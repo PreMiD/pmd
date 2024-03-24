@@ -26,6 +26,6 @@ export async function getLatestSchema(): Promise<string> {
 export default async function fetchSchema() {
   const latestSchema = await getLatestSchema();
   return (
-    await fetch(`https://schemas.premid.app/metadata/1.${latestSchema}`)
+    await fetch(`https://schemas.premid.app/metadata/${latestSchema}`)
   ).json();
 }
