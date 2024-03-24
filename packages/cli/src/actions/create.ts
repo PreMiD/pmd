@@ -188,6 +188,7 @@ await mkdir(resolve(presencePath, "dist"), {
   recursive: true,
 });
 
+metadata["$schema"] = schema["$id"];
 metadata.service = res.service;
 metadata.description = { en: res.description };
 metadata.author = {
