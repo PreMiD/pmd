@@ -1,5 +1,5 @@
 {
-	"$schema": "https://schemas.premid.app/metadata/1.9",
+	"$schema": "",
 	"author": {
 		"name": "",
 		"id": ""
@@ -9,6 +9,7 @@
 		"en": ""
 	},
 	"url": "",
+	"matches": [],
 	"version": "",
 	"logo": "",
 	"thumbnail": "",

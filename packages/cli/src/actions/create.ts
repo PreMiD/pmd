@@ -188,13 +188,17 @@ await mkdir(resolve(presencePath, "dist"), {
   recursive: true,
 });
 
+const urls = res.url.split(",").length > 1 ? res.url.split(",") : [res.url];
+
+metadata["$schema"] = schema["$id"];
 metadata.service = res.service;
 metadata.description = { en: res.description };
 metadata.author = {
   id: res.author,
   name: serviceAuthor!.username,
 };
-metadata.url = res.url.split(",").length > 1 ? res.url.split(",") : res.url;
+metadata.url = urls.length > 1 ? urls : urls[0];
+metadata.matches = urls.map((url) => `*://${url}/*`);
 metadata.logo = res.logo;
 metadata.thumbnail = res.thumbnail;
 metadata.color = res.color;
